@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useGeoVista } from '../context/GeoVISTAContext';
 import { Viewer3D } from '../components/Viewer3D';
+import { CityCadastreWorkspace } from '../components/CityCadastreWorkspace';
 import { ValidationBadge } from '../components/ValidationBadge';
 import { api } from '../services/api';
 import {
@@ -306,7 +307,7 @@ export const OfficerPortal: React.FC = () => {
               </div>
 
               {/* 3D Volumetric View (Shared generic component from GeoVistaContext) */}
-              <Viewer3D />
+              <CityCadastreWorkspace legacyViewer={<Viewer3D />} />
 
               {/* 9-Rule Validation Engine Results */}
               {validation && (

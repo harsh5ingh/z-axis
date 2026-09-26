@@ -301,7 +301,7 @@ export const ScenariosPage: React.FC = () => {
             GeoVISTA End-to-End Demonstration Scenarios
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            Demonstrates full PS26011 compliance: urban workflow, multi-sensor pipeline, AI capabilities, deterministic validation, and human review.
+            Demonstrates the SIH26011 prototype workflow: urban mapping, data processing, technical validation, and human review.
           </p>
         </div>
 

@@ -1,174 +1,171 @@
-# ============================================
-# GeoVISTA / 3D ULPIN - Git Ignore
-# ============================================
+# ================================
 
-# ---------- Python ----------
-__pycache__/
-*.py[cod]
-*$py.class
-*.pyo
-*.pyd
+# Environment & Secrets
 
-# Python virtual environments
-.venv/
-venv/
-env/
-ENV/
+# ================================
 
-# Python packaging
-*.egg
-*.egg-info/
-dist/
-build/
-.eggs/
-
-# ---------- Testing ----------
-.pytest_cache/
-.coverage
-htmlcov/
-.coverage.*
-.tox/
-.nox/
-
-# ---------- Environment / Secrets ----------
 .env
 .env.*
 !.env.example
-.env.local
-.env
-backend/.env
-backend/src/data/users.json
-backend/src/data/user.json
-src/components/Viewer3D copy.tsx
-frontend/dist/
+*.local
 
-# ---------- IDE / Editors ----------
-.vscode/
-.idea/
-*.swp
-*.swo
-.DS_Store
+# ================================
 
-# ---------- Node / React ----------
+# Node / JavaScript
+
+# ================================
+
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Build output
-frontend/dist/
-frontend/build/
-frontend/.vite/
+# Build outputs
 
-node_modules/
 dist/
-.env
-.env.local
-
-# ---------- Logs ----------
-*.log
-logs/
-
-# ---------- OS ----------
-Thumbs.db
-Desktop.ini
-.DS_Store
-
-# ---------- GIS / Large Data ----------
-# Raw geospatial data can become very large
-*.las
-*.laz
-*.tif
-*.tiff
-*.img
-*.ecw
-
-# Point cloud / 3D temporary files
-*.ply
-*.pcd
-*.xyz
-*.e57
-
-# Large 3D model files
-*.obj
-*.fbx
-*.glb
-*.gltf
-*.3ds
-
-# Temporary GIS files
-*.qgz~
-*.gpkg-shm
-*.gpkg-wal
-
-# ---------- Generated / Temporary Data ----------
-data/raw/
-data/temp/
-data/tmp/
-output/
-outputs/
-tmp/
-temp/
-
-# ---------- AI / ML ----------
-# Model weights can be very large
-*.pt
-*.pth
-*.onnx
-*.weights
-*.h5
-
-# ML generated files
-runs/
-wandb/
-mlruns/
-
-# ---------- Database ----------
-*.sqlite
-*.sqlite3
-*.db
-
-# PostgreSQL local dumps
-*.dump
-*.backup
-
-# ---------- Cache ----------
+build/
+.vite/
 .cache/
-.pycache/
+.parcel-cache/
+
+# ================================
+
+# Python
+
+# ================================
+
+.venv/
+venv/
+env/
+**pycache**/
+*.py[cod]
+*$py.class
+.pytest_cache/
 .mypy_cache/
 .ruff_cache/
 
-# ---------- Jupyter ----------
-.ipynb_checkpoints/
+# ================================
 
-# ---------- Secrets / Keys ----------
+# Backend runtime/local data
+
+# ================================
+
+backend/src/data/user.json
+backend/src/data/users.json
+
+# ================================
+
+# GIS / Large datasets
+
+# ================================
+
+# Raw source datasets
+
+data/raw/
+
+# Processed/generated datasets
+
+data/processed/
+
+# DEM / LiDAR / raster / vector generated files
+
+*.tif
+*.tiff
+*.hgt
+*.las
+*.laz
+*.gpkg
+*.shp
+*.shx
+*.dbf
+*.prj
+*.cpg
+
+# Large GIS exports
+
+*.geojson
+*.geoparquet
+*.parquet
+*.csv.gz
+
+# ================================
+
+# Local Azure / cloud credentials
+
+# ================================
+
+.azure/
+.azure-cli/
 *.pem
 *.key
-*.crt
-credentials.json
-service-account*.json
+*.pfx
 
-# ---------- Local Configuration ----------
-config.local.*
-settings.local.*
+# ================================
 
-# ---------- Generated Documentation ----------
+# Logs
+
+# ================================
+
+*.log
+logs/
+
+# ================================
+
+# OS files
+
+# ================================
+
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ================================
+
+# IDE / Editors
+
+# ================================
+
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+.idea/
+*.swp
+*.swo
+
+# ================================
+
+# Temporary files
+
+# ================================
+
 *.tmp
+*.temp
 *.bak
-
-# ---------- Backup Files ----------
-*.orig
 *.backup
-*~
 
-# ============================================
-# IMPORTANT PROJECT FILES - DO NOT IGNORE
-# ============================================
+# ================================
 
-# requirements.txt
-# package.json
-# package-lock.json
-# README.md
-# docs/
-# src/
+# Coverage
+
+# ================================
+
+coverage/
+.nyc_output/
+
+# ================================
+
+# Vercel
+
+# ================================
+
+.vercel/
+
+# ================================
+
+# TypeScript
+
+# ================================
+
+*.tsbuildinfo

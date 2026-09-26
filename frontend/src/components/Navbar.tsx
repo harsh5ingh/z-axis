@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 
 import { AuthUser } from "../services/api";
+import { RegionalLanguage, ThemePreference, useUISettings } from "../context/UISettingsContext";
 
 /* ==========================================================================
    TYPES
@@ -53,6 +54,7 @@ interface NavbarProps {
   onSettings: () => void;
   onHelp: () => void;
   onLogout: () => void;
+  profileDemoVerified?: boolean;
 }
 
 /* ==========================================================================
@@ -99,7 +101,7 @@ const locations = [
   "Puducherry",
 ];
 
-const languages = [
+const languages: RegionalLanguage[] = [
   "English",
   "हिन्दी",
   "मराठी",
@@ -135,7 +137,9 @@ export const Navbar: React.FC<
   onSettings,
   onHelp,
   onLogout,
+  profileDemoVerified = false,
 }) => {
+  const { language: selectedLanguage, setLanguage, theme: selectedTheme, setTheme, city, setCity } = useUISettings();
   const [locationOpen, setLocationOpen] =
     useState(false);
 
@@ -159,14 +163,8 @@ export const Navbar: React.FC<
 
   const [selectedLocation, setSelectedLocation] =
     useState("India");
-
-  const [selectedLanguage, setSelectedLanguage] =
-    useState("English");
-
-  const [selectedTheme, setSelectedTheme] =
-    useState<
-      "dark" | "system" | "light"
-    >("system");
+  const visibleLocations = city === "reference" ? ["New York City"] : locations;
+  const locationLabel = city === "reference" ? "New York City" : selectedLocation;
 
   const navbarRef =
     useRef<HTMLDivElement>(null);
@@ -261,9 +259,12 @@ export const Navbar: React.FC<
   const handleLocationChange = (
     location: string,
   ) => {
-    setSelectedLocation(
-      location,
-    );
+    if (location === "New York City") {
+      setCity("reference");
+    } else {
+      setCity("bhopal");
+      setSelectedLocation(location);
+    }
 
     closeAllMenus();
   };
@@ -272,12 +273,8 @@ export const Navbar: React.FC<
      LANGUAGE
   ========================================================================== */
 
-  const handleLanguageChange = (
-    language: string,
-  ) => {
-    setSelectedLanguage(
-      language,
-    );
+  const handleLanguageChange = (language: RegionalLanguage) => {
+    setLanguage(language);
 
     closeAllMenus();
   };
@@ -286,13 +283,8 @@ export const Navbar: React.FC<
      THEME
   ========================================================================== */
 
-  const handleThemeChange = (
-    theme:
-      | "dark"
-      | "system"
-      | "light",
-  ) => {
-    setSelectedTheme(theme);
+  const handleThemeChange = (theme: ThemePreference) => {
+    setTheme(theme);
     closeAllMenus();
   };
 
@@ -490,7 +482,7 @@ export const Navbar: React.FC<
                 <MapPin className="h-4 w-4 text-blue-600" />
 
                 <span className="max-w-[75px] truncate">
-                  {selectedLocation}
+                  {locationLabel}
                 </span>
 
                 <ChevronDown
@@ -507,12 +499,12 @@ export const Navbar: React.FC<
                 <div className="absolute right-0 top-[calc(100%+8px)] z-[100] w-64 overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl">
 
                   <div className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                    Select Region
+                    {city === "reference" ? "Selected City" : "Select Region"}
                   </div>
 
                   <div className="max-h-80 overflow-y-auto">
 
-                    {locations.map(
+                    {visibleLocations.map(
                       (location) => (
                         <button
                           key={
@@ -525,7 +517,7 @@ export const Navbar: React.FC<
                             )
                           }
                           className={`flex w-full items-center rounded-lg px-3 py-2 text-left text-sm transition ${
-                            selectedLocation ===
+                            locationLabel ===
                             location
                               ? "bg-blue-50 font-semibold text-blue-600"
                               : "text-slate-700 hover:bg-slate-50"
@@ -968,7 +960,7 @@ export const Navbar: React.FC<
                       </p>
 
                       <span className="mt-2 inline-flex rounded-full bg-blue-50 px-2 py-1 text-[10px] font-bold uppercase text-blue-600">
-                        {currentUser.role}
+                        {currentUser.role}{profileDemoVerified && currentUser.role === "public" ? " · DEMO VERIFIED" : ""}
                       </span>
 
                     </div>
@@ -1296,47 +1288,24 @@ export const Navbar: React.FC<
 
             <div className="mt-3 border-t border-slate-100 pt-3">
 
-              <div className="grid grid-cols-3 gap-2">
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleThemeChange(
-                      "system",
-                    )
-                  }
-                  className="flex flex-col items-center gap-1 rounded-lg border border-slate-200 p-2 text-[10px] font-semibold text-slate-600"
-                >
-                  <Monitor className="h-4 w-4" />
-                  System
+              <div className="grid grid-cols-2 gap-2">
+                <button type="button" onClick={() => {
+                  const order: ThemePreference[] = ["system", "light", "dark"];
+                  handleThemeChange(order[(order.indexOf(selectedTheme) + 1) % order.length]);
+                }} className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 p-2.5 text-xs font-semibold text-slate-600">
+                  {selectedTheme === "dark" ? <Moon className="h-4 w-4" /> : selectedTheme === "light" ? <Sun className="h-4 w-4" /> : <Monitor className="h-4 w-4" />}
+                  {selectedTheme === "system" ? "System" : selectedTheme === "dark" ? "Dark" : "Light"}
                 </button>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleLocationChange(
-                      "India",
-                    )
-                  }
-                  className="flex flex-col items-center gap-1 rounded-lg border border-slate-200 p-2 text-[10px] font-semibold text-slate-600"
-                >
-                  <MapPin className="h-4 w-4" />
-                  India
+                <button type="button" onClick={() => handleLocationChange(city === "reference" ? "India" : "New York City")} className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 p-2.5 text-xs font-semibold text-slate-600">
+                  <MapPin className="h-4 w-4" />{city === "reference" ? "New York City" : "India"}
                 </button>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleLanguageChange(
-                      "English",
-                    )
-                  }
-                  className="flex flex-col items-center gap-1 rounded-lg border border-slate-200 p-2 text-[10px] font-semibold text-slate-600"
-                >
-                  <Languages className="h-4 w-4" />
-                  English
-                </button>
-
+                <label className="col-span-2 flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600">
+                  <Languages className="h-4 w-4 shrink-0" />
+                  <span className="shrink-0">Language</span>
+                  <select aria-label="Regional language" value={selectedLanguage} onChange={(event) => handleLanguageChange(event.target.value as RegionalLanguage)} className="min-w-0 flex-1 border-0 bg-transparent py-1 text-right text-xs font-semibold text-slate-700 outline-none">
+                    {languages.map((language) => <option key={language} value={language}>{language}</option>)}
+                  </select>
+                </label>
               </div>
 
             </div>

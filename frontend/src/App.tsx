@@ -1,15 +1,18 @@
 import React, {
   useEffect,
+  useMemo,
   useState,
 } from "react";
 
 import { GeoVistaProvider } from "./context/GeoVISTAContext";
+import { UISettingsProvider } from "./context/UISettingsContext";
 import { Navbar } from "./components/Navbar";
 
 import { PublicPortal } from "./pages/PublicPortal";
 import { OfficerPortal } from "./pages/OfficerPortal";
 import { ScenariosPage } from "./pages/ScenariosPage";
 import { HomePage } from "./pages/HomePage";
+import { AccountPanel, AccountPanels, readDemoProfile } from "./components/AccountPanels";
 
 import {
   api,
@@ -63,6 +66,9 @@ const AppContent: React.FC = () => {
 
   const [currentUser, setCurrentUser] =
     useState<AuthUser | null>(null);
+  const [accountPanel, setAccountPanel] = useState<AccountPanel>(null);
+  const [profileRevision, setProfileRevision] = useState(0);
+  const profileDemoVerified = useMemo(() => Boolean(readDemoProfile(currentUser)), [currentUser, profileRevision]);
 
   /* ------------------------------------------------------------------------
      RESTORE SESSION
@@ -252,9 +258,7 @@ const AppContent: React.FC = () => {
   ------------------------------------------------------------------------ */
 
   const openProfile = () => {
-    alert(
-      "Profile page will be available soon.",
-    );
+    setAccountPanel("profile");
   };
 
   /* ------------------------------------------------------------------------
@@ -262,9 +266,7 @@ const AppContent: React.FC = () => {
   ------------------------------------------------------------------------ */
 
   const openSettings = () => {
-    alert(
-      "Settings will be available soon.",
-    );
+    setAccountPanel("settings");
   };
 
   /* ------------------------------------------------------------------------
@@ -272,9 +274,7 @@ const AppContent: React.FC = () => {
   ------------------------------------------------------------------------ */
 
   const openHelp = () => {
-    alert(
-      "GeoVista Help & Support will be available soon.",
-    );
+    setAccountPanel("help");
   };
 
   /* ------------------------------------------------------------------------
@@ -324,6 +324,7 @@ const AppContent: React.FC = () => {
       <Navbar
         currentView={view}
         currentUser={currentUser}
+        profileDemoVerified={profileDemoVerified}
 
         onHome={() =>
           setView("home")
@@ -455,6 +456,13 @@ const AppContent: React.FC = () => {
         />
       )}
 
+      <AccountPanels
+        panel={accountPanel}
+        user={currentUser}
+        onClose={() => setAccountPanel(null)}
+        onProfileSaved={() => setProfileRevision((revision) => revision + 1)}
+      />
+
       {/* ==================================================================
           FOOTER
       ================================================================== */}
@@ -462,9 +470,9 @@ const AppContent: React.FC = () => {
       {view !== "home" && (
         <footer className="bg-[#031b33] text-white">
 
-          <div className="mx-auto max-w-7xl px-6 py-10">
+          <div className="mx-auto max-w-7xl px-5 py-5 sm:px-6 sm:py-6">
 
-            <div className="grid grid-cols-1 gap-10 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-5 sm:grid-cols-4 sm:gap-6">
 
               {/* GOVERNMENT */}
 
@@ -472,18 +480,16 @@ const AppContent: React.FC = () => {
 
                 <div className="flex items-center gap-3">
 
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 text-2xl">
-                    🇮🇳
-                  </div>
+                  <img src="/assets/survey-of-india-emblem.png" alt="Survey of India emblem, used as a project reference" className="h-11 w-11 object-contain" />
 
                   <div>
 
-                    <div className="text-lg font-semibold">
-                      भारतीय सर्वेक्षण विभाग
+                    <div className="text-base font-semibold">
+                      GeoVISTA
                     </div>
 
-                    <div className="text-xl font-bold">
-                      Survey of India
+                    <div className="text-lg font-bold">
+                      3D ULPIN Prototype
                     </div>
 
                   </div>
@@ -491,12 +497,11 @@ const AppContent: React.FC = () => {
                 </div>
 
                 <p className="mt-3 text-sm text-slate-300">
-                  Ministry of Science &
-                  Technology
+                  SIH 2026 · Problem SIH26011
                 </p>
 
                 <p className="text-sm text-slate-400">
-                  Government of India
+                  Bhopal project data · NYC reference data
                 </p>
 
               </div>
@@ -516,12 +521,11 @@ const AppContent: React.FC = () => {
                   </p>
 
                   <p>
-                    Ministry of Science &
-                    Technology
+                    3D ULPIN workflow
                   </p>
 
                   <p>
-                    Survey of India
+                    Data provenance
                   </p>
 
                   <p>
@@ -628,25 +632,22 @@ const AppContent: React.FC = () => {
                 </h3>
 
                 <div className="mb-5 flex gap-4 text-xl">
-                  <span>𝕏</span>
-                  <span>in</span>
-                  <span>▶</span>
-                  <span>◎</span>
+                  <span className="rounded-md border border-white/15 px-2 py-1 text-xs">Actual data</span>
+                  <span className="rounded-md border border-white/15 px-2 py-1 text-xs">Reference</span>
+                  <span className="rounded-md border border-white/15 px-2 py-1 text-xs">Prototype</span>
                 </div>
 
                 <p className="text-sm leading-relaxed text-slate-300">
-                  📍 Survey of India,
-                  Hathibarkala Estate
+                  Bhopal · Primary project dataset
                   <br />
-                  Dehradun - 248001,
-                  Uttarakhand, India
+                  New York City · Reference data
                 </p>
 
               </div>
 
             </div>
 
-            <div className="mt-8 flex flex-col justify-between gap-3 border-t border-slate-700 pt-5 text-xs text-slate-400 md:flex-row">
+            <div className="mt-5 flex flex-col justify-between gap-2 border-t border-slate-700 pt-3 text-[11px] text-slate-400 md:flex-row">
 
               <span>
                 © 2026 GeoVista - 3D
@@ -655,10 +656,7 @@ const AppContent: React.FC = () => {
               </span>
 
               <span>
-                A Digital Initiative under
-                Ministry of Science &
-                Technology, Government of
-                India
+                SIH 2026 prototype · Not an official cadastral validation service
               </span>
 
             </div>
@@ -1433,9 +1431,11 @@ const AuthModal: React.FC<
 export const App: React.FC =
   () => {
     return (
-      <GeoVistaProvider>
-        <AppContent />
-      </GeoVistaProvider>
+      <UISettingsProvider>
+        <GeoVistaProvider>
+          <AppContent />
+        </GeoVistaProvider>
+      </UISettingsProvider>
     );
   };
 

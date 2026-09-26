@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { useGeoVista } from "../context/GeoVISTAContext";
 import { Map2D } from "../components/Map2D";
-import { Viewer3D } from "../components/Viewer3D";
+import { CityCadastreWorkspace } from "../components/CityCadastreWorkspace";
 import { EvidenceList } from "../components/EvidenceList";
 import { ConfidenceMeter } from "../components/ConfidenceMeter";
 import { ValidationBadge } from "../components/ValidationBadge";
 import { IssueReportModal } from "../components/IssueReportModal";
 import { GuidedAssistant } from "../components/GuidedAssistant";
+import { useUISettings } from "../context/UISettingsContext";
 
 import {
   Search,
@@ -21,6 +22,7 @@ import {
   Database,
   Activity,
   ChevronRight,
+  Map as StreetMapIcon,
 } from "lucide-react";
 
 export const PublicPortal: React.FC = () => {
@@ -35,22 +37,55 @@ export const PublicPortal: React.FC = () => {
     candidates,
     underground,
     elevated,
+    error,
     selectParcelById,
     searchCadastre,
     loading,
   } = useGeoVista();
 
-  const [searchQuery, setSearchQuery] = useState("P001");
+  const [searchQuery, setSearchQuery] = useState("");
+  const { city: selectedCity, setCity: setSelectedCity } = useUISettings();
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [recentSearches, setRecentSearches] = useState<string[]>(() => {
+    try {
+      const saved = JSON.parse(
+        window.localStorage.getItem("geovista.public.recent-searches") ?? "[]",
+      );
+      return Array.isArray(saved)
+        ? saved.filter((item): item is string => typeof item === "string").slice(0, 5)
+        : [];
+    } catch {
+      return [];
+    }
+  });
 
-  const handleSearch = async (event: React.FormEvent) => {
-    event.preventDefault();
+  const rememberSearch = (query: string) => {
+    const next = [
+      query,
+      ...recentSearches.filter((item) => item.toLowerCase() !== query.toLowerCase()),
+    ].slice(0, 5);
+    setRecentSearches(next);
+    try {
+      window.localStorage.setItem(
+        "geovista.public.recent-searches",
+        JSON.stringify(next),
+      );
+    } catch {
+      // Search remains usable when browser storage is unavailable.
+    }
+  };
 
-    const query = searchQuery.trim();
-
+  const runSearch = async (value: string) => {
+    const query = value.trim();
     if (!query) return;
-
+    setSearchQuery(query);
+    rememberSearch(query);
     await searchCadastre(query);
+  };
+
+  const handleSearch = (event: React.FormEvent) => {
+    event.preventDefault();
+    void runSearch(searchQuery);
   };
 
   return (
@@ -80,16 +115,19 @@ export const PublicPortal: React.FC = () => {
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
 
-              <div className="hidden rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 sm:block">
-                <div className="flex items-center gap-2 text-xs text-slate-500">
-                  <Activity className="h-4 w-4 text-emerald-600" />
-                  Spatial Data System
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5">
+                <div className="mb-1.5 flex items-center gap-2 px-1 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                  <Activity className="h-3.5 w-3.5 text-emerald-600" /> 3D City
                 </div>
-
-                <div className="mt-1 text-sm font-bold text-slate-800">
-                  Operational
+                <div className="flex gap-1.5">
+                  <button type="button" aria-pressed={selectedCity === "bhopal"} onClick={() => setSelectedCity("bhopal")} className={`rounded-lg px-3 py-2 text-left transition ${selectedCity === "bhopal" ? "bg-[#0e3550] text-white shadow-sm" : "bg-white text-slate-700 hover:bg-blue-50"}`}>
+                    <span className="block text-xs font-bold">Bhopal</span><span className={`block text-[9px] ${selectedCity === "bhopal" ? "text-cyan-100" : "text-slate-500"}`}>Actual project data</span>
+                  </button>
+                  <button type="button" aria-pressed={selectedCity === "reference"} onClick={() => setSelectedCity("reference")} className={`rounded-lg px-3 py-2 text-left transition ${selectedCity === "reference" ? "bg-[#0e3550] text-white shadow-sm" : "bg-white text-slate-700 hover:bg-blue-50"}`}>
+                    <span className="block text-xs font-bold">New York City</span><span className={`block text-[9px] ${selectedCity === "reference" ? "text-cyan-100" : "text-slate-500"}`}>Reference data</span>
+                  </button>
                 </div>
               </div>
 
@@ -121,29 +159,29 @@ export const PublicPortal: React.FC = () => {
           <Info className="mt-0.5 h-4 w-4 shrink-0 text-blue-700" />
 
           <p className="leading-relaxed">
-            <strong>Public Property Discovery Portal:</strong>{" "}
-            Displays proposed 3D volumetric cadastre identifiers,
-            multi-sensor spatial evidence and technical confidence
-            for citizen transparency. This system generates prototype
-            spatial candidates and does not certify legal land titles.
+            <strong>SIH26011 prototype:</strong>{" "}
+            Bhopal uses the project building dataset. NYC is a reference
+            demonstration. Derived floors, demo identifiers and technical
+            checks are labelled in the viewer; this portal does not establish
+            ownership, legal rights or official ULPIN status.
           </p>
         </div>
 
         {/* =======================================================
             SEARCH
         ======================================================= */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        {selectedCity === "bhopal" && <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
 
           <div className="mb-3 flex items-center gap-2">
             <Search className="h-5 w-5 text-blue-600" />
 
             <div>
               <h2 className="text-sm font-bold text-[#071d35]">
-                Search Cadastral Records
+                Find a Property Record
               </h2>
 
               <p className="text-xs text-slate-500">
-                Search using parcel code, 3D identifier, locality or building.
+                Search backend-linked parcel, building or proposed property records. Use the 3D viewer below to inspect the Bhopal dataset or NYC reference data.
               </p>
             </div>
           </div>
@@ -158,7 +196,7 @@ export const PublicPortal: React.FC = () => {
 
               <input
                 type="text"
-                placeholder="Search P001, P002, 3D ID, locality or building..."
+                placeholder="Parcel code, building ID, proposed 3D ID, locality..."
                 value={searchQuery}
                 onChange={(event) =>
                   setSearchQuery(event.target.value)
@@ -182,18 +220,54 @@ export const PublicPortal: React.FC = () => {
             </button>
           </form>
 
-          {/* SAMPLE PARCELS */}
-          <div className="mt-4 flex items-center gap-2 overflow-x-auto pb-1">
+          {error && (
+            <div role="alert" className="mt-3 flex items-start gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2.5 text-xs text-rose-800">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {loading && (
+            <p aria-live="polite" className="mt-3 text-xs text-blue-700">
+              Loading or searching the property records…
+            </p>
+          )}
+
+          {/* RECENT SEARCHES */}
+          {recentSearches.length > 0 && (
+            <div className="mt-4 flex items-center gap-2 overflow-x-auto pb-1">
+              <span className="shrink-0 text-xs font-semibold text-slate-400">
+                Recent searches:
+              </span>
+              {recentSearches.map((query) => (
+                <button
+                  key={query}
+                  type="button"
+                  onClick={() => void runSearch(query)}
+                  className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 transition hover:border-blue-300 hover:bg-blue-50"
+                >
+                  {query}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* API RECORD SHORTCUTS */}
+          <div className="mt-3 flex items-center gap-2 overflow-x-auto pb-1">
 
             <span className="shrink-0 text-xs font-semibold text-slate-400">
-              Sample Parcels:
+              Available record examples:
             </span>
 
-            {parcels.map((parcel) => (
+            {parcels.slice(0, 6).map((parcel) => (
               <button
                 key={parcel.id}
                 type="button"
-                onClick={() => selectParcelById(parcel.id)}
+                onClick={() => {
+                  setSearchQuery(parcel.parcel_code);
+                  rememberSearch(parcel.parcel_code);
+                  void selectParcelById(parcel.id);
+                }}
                 className={`shrink-0 rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
                   selectedParcel?.id === parcel.id
                     ? "border-blue-600 bg-blue-600 text-white"
@@ -205,8 +279,13 @@ export const PublicPortal: React.FC = () => {
                 {parcel.locality}
               </button>
             ))}
+            {parcels.length === 0 && !loading && (
+              <span className="text-xs text-slate-500">
+                No API examples loaded. You can still explore the city dataset in the viewer.
+              </span>
+            )}
           </div>
-        </section>
+        </section>}
 
         {/* =======================================================
             MAIN GRID
@@ -235,21 +314,58 @@ export const PublicPortal: React.FC = () => {
                     </h2>
 
                     <p className="text-xs text-slate-500">
-                      Interactive property and vertical spatial view
+                      {selectedCity === "bhopal" ? "Bhopal — GeoVISTA primary project dataset" : "Reference City — New York City PS demonstration"}
                     </p>
+                    <p className="mt-1 text-[10px] text-slate-400">Map controls and source attributes are shown in English.</p>
                   </div>
                 </div>
 
                 <span className="hidden rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-[10px] font-bold text-emerald-700 sm:block">
-                  3D VIEW
+                  {selectedCity === "bhopal" ? "ACTUAL PROJECT DATA" : "PROTOTYPE / REFERENCE DATA"}
                 </span>
               </div>
 
-              <Viewer3D />
+              <div className="grid grid-cols-2 gap-px border-b border-slate-100 bg-slate-100 text-[10px] sm:grid-cols-4">
+                {[
+                  ["1", selectedCity === "bhopal" ? "Bhopal project dataset" : "NYC reference dataset"],
+                  ["2", "Select a building or parcel"],
+                  ["3", "Inspect floors and Z range"],
+                  ["4", "Review prototype checks"],
+                ].map(([step, label]) => (
+                  <div key={step} className="flex items-center gap-2 bg-white px-3 py-2 text-slate-600">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-50 font-bold text-blue-700">{step}</span>
+                    {label}
+                  </div>
+                ))}
+              </div>
+
+              <CityCadastreWorkspace selectedCity={selectedCity} onCityChange={setSelectedCity} showCitySelector={false} showLegacyInspector={false} />
             </div>
 
+            {/* CITY STREET CONTEXT */}
+            <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50"><StreetMapIcon className="h-5 w-5 text-emerald-700" /></div>
+                  <div><h2 className="text-sm font-bold text-[#071d35]">{selectedCity === "bhopal" ? "Bhopal street and neighborhood context" : "New York City street and borough context"}</h2><p className="text-xs text-slate-500">OpenStreetMap street basemap · separate from cadastral records</p></div>
+                </div>
+                <span className="hidden rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-bold text-slate-600 sm:block">2D CITY CONTEXT</span>
+              </div>
+              <iframe
+                key={selectedCity}
+                title={selectedCity === "bhopal" ? "Bhopal streets and neighborhoods map" : "New York City streets and neighborhoods map"}
+                src={selectedCity === "bhopal"
+                  ? "https://www.openstreetmap.org/export/embed.html?bbox=77.32%2C23.16%2C77.50%2C23.32&layer=mapnik&marker=23.2596%2C77.4126"
+                  : "https://www.openstreetmap.org/export/embed.html?bbox=-74.26%2C40.49%2C-73.70%2C40.92&layer=mapnik&marker=40.7128%2C-74.0060"}
+                className="h-[360px] w-full border-0 bg-slate-100"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+              <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 px-4 py-2.5 text-[10px] text-slate-500"><span>{selectedCity === "bhopal" ? "Bhopal, Madhya Pradesh · locality and road context" : "New York City · all five boroughs, streets and neighborhoods"}</span><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer" className="font-medium text-blue-700 hover:underline">© OpenStreetMap contributors</a></div>
+            </section>
+
             {/* 2D MAP */}
-            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            {selectedCity === "bhopal" && <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
 
               <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
 
@@ -261,11 +377,11 @@ export const PublicPortal: React.FC = () => {
 
                   <div>
                     <h2 className="text-sm font-bold text-[#071d35]">
-                      2D Cadastral Footprint
+                      2D Record Footprint
                     </h2>
 
                     <p className="text-xs text-slate-500">
-                      Parcel and building footprint reference
+                      API-linked record map; separate from the city dataset viewer above
                     </p>
                   </div>
                 </div>
@@ -280,7 +396,7 @@ export const PublicPortal: React.FC = () => {
                 building={selectedBuilding}
                 selectedUnit={selectedProperty}
               />
-            </div>
+            </div>}
           </div>
 
           {/* =====================================================
@@ -291,7 +407,14 @@ export const PublicPortal: React.FC = () => {
             {/* ===================================================
                 PROPERTY SELECTED
             =================================================== */}
-            {selectedProperty ? (
+            {selectedCity === "reference" ? (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
+                <span className="inline-flex rounded-md border border-amber-200 bg-white px-2 py-1 text-[9px] font-extrabold uppercase tracking-wider text-amber-900">Prototype / reference data</span>
+                <h2 className="mt-3 text-lg font-bold text-slate-900">New York City reference mode</h2>
+                <p className="mt-2 text-sm leading-relaxed text-slate-600">The 3D view loads open building footprints and public tax-lot sample data for the selected Manhattan area. Use the inspector inside the map to explore building height, derived floors, vertical extent and demonstration 3D identity.</p>
+                <p className="mt-3 border-t border-amber-200 pt-3 text-xs leading-relaxed text-amber-900">This is a PS workflow demonstration. It is not an official cadastral map, ownership record or government ULPIN.</p>
+              </div>
+            ) : selectedProperty ? (
               <>
                 {/* REVIEW ALERT */}
                 {selectedProperty.verification_status ===
@@ -301,10 +424,9 @@ export const PublicPortal: React.FC = () => {
                     <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" />
 
                     <p className="leading-relaxed">
-                      <strong>Under Official Review:</strong>{" "}
-                      This property is currently under official review.
-                      Some spatial values may be updated after survey
-                      verification.
+                      <strong>Prototype workflow status: Under review.</strong>{" "}
+                      This status comes from the linked property record. It does not indicate
+                      government review or legal cadastral verification.
                     </p>
                   </div>
                 )}
@@ -316,20 +438,21 @@ export const PublicPortal: React.FC = () => {
 
                     <div className="min-w-0">
 
-                      <span className="inline-flex items-center gap-1 rounded-md border border-blue-100 bg-blue-50 px-2 py-1 text-[9px] font-extrabold uppercase tracking-wider text-blue-900">
+                      <span className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[9px] font-extrabold uppercase tracking-wider ${selectedProperty.is_synthetic ? "border-amber-200 bg-amber-50 text-amber-900" : "border-blue-100 bg-blue-50 text-blue-900"}`}>
                         <ShieldCheck className="h-3 w-3" />
-                        Proposed 3D Spatial Identifier
+                        {selectedProperty.is_synthetic ? "Synthetic demo record" : "API-linked record"}
                       </span>
 
                       <h2 className="mt-2 break-all font-mono text-sm font-bold text-slate-900">
                         {selectedProperty.proposed_3d_id}
                       </h2>
+                      <p className="mt-1 text-[10px] text-slate-500">Proposed 3D property identifier · prototype only, not an official ULPIN</p>
                     </div>
 
-                    <ValidationBadge
-                      status={selectedProperty.verification_status}
-                      size="sm"
-                    />
+                    <div className="shrink-0 text-right">
+                      <span className="mb-1 block text-[9px] text-slate-400">Prototype record status</span>
+                      <ValidationBadge status={selectedProperty.verification_status} size="sm" />
+                    </div>
                   </div>
 
                   {/* DETAILS */}
@@ -385,7 +508,7 @@ export const PublicPortal: React.FC = () => {
                   <div className="flex items-center justify-between gap-3 pt-4">
 
                     <span className="text-xs text-slate-500">
-                      Revision Version:{" "}
+                      Record revision:{" "}
                       <strong className="text-slate-800">
                         v{selectedProperty.revision_number}
                       </strong>
@@ -399,7 +522,7 @@ export const PublicPortal: React.FC = () => {
                       className="flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100"
                     >
                       <Flag className="h-3.5 w-3.5" />
-                      Report Issue
+                      Report prototype issue
                     </button>
                   </div>
                 </div>
@@ -407,11 +530,13 @@ export const PublicPortal: React.FC = () => {
                 {/* CONFIDENCE */}
                 <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                   <ConfidenceMeter confidence={confidence} />
+                  <p className="mt-2 text-[10px] leading-relaxed text-slate-500">Technical confidence for this linked record only; it does not establish ownership or legal validity.</p>
                 </div>
 
                 {/* EVIDENCE */}
                 <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                   <EvidenceList evidences={evidence} />
+                  <p className="mt-2 text-[10px] leading-relaxed text-slate-500">Check each source label and demo flag before interpreting evidence as measured or authoritative.</p>
                 </div>
               </>
             ) : selectedParcel ? (
@@ -425,8 +550,8 @@ export const PublicPortal: React.FC = () => {
                   <div className="flex items-start justify-between gap-3">
 
                     <div>
-                      <span className="inline-flex items-center gap-1 rounded-md border border-emerald-100 bg-emerald-50 px-2 py-1 text-[9px] font-extrabold uppercase tracking-wider text-emerald-900">
-                        {selectedParcel.area_type} Cadastral Parcel
+                      <span className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[9px] font-extrabold uppercase tracking-wider ${selectedParcel.is_synthetic ? "border-amber-200 bg-amber-50 text-amber-900" : "border-emerald-100 bg-emerald-50 text-emerald-900"}`}>
+                        {selectedParcel.is_synthetic ? "Synthetic demo parcel" : "API-linked parcel"}
                       </span>
 
                       <h2 className="mt-2 font-mono text-sm font-bold text-slate-900">
@@ -534,8 +659,8 @@ export const PublicPortal: React.FC = () => {
 
                     <p className="text-xs leading-relaxed text-slate-500">
                       {selectedParcel.area_type === "RURAL"
-                        ? "Agricultural parcel mapped under the SVAMITVA / Digital India Land Records Modernization Programme. 3D candidate assists support rural structure verification."
-                        : "Urban right-of-way volumetric parcel supporting multi-layer elevated and subsurface transportation infrastructure."}
+                        ? "The linked record is tagged as rural. Confirm its source and survey status in the evidence before using it for decisions."
+                        : "The linked record is tagged as urban. Any 3D candidate or infrastructure relationship shown here is prototype context, not a legal parcel determination."}
                     </p>
                   </div>
                 </div>
@@ -544,12 +669,14 @@ export const PublicPortal: React.FC = () => {
                 {confidence && (
                   <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                     <ConfidenceMeter confidence={confidence} />
+                    <p className="mt-2 text-[10px] text-slate-500">Prototype technical confidence; not a land-title or ownership score.</p>
                   </div>
                 )}
 
                 {/* EVIDENCE */}
                 <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                   <EvidenceList evidences={evidence} />
+                  <p className="mt-2 text-[10px] text-slate-500">Evidence may be synthetic or derived. Use the displayed source and status fields as provenance hints.</p>
                 </div>
 
                 {/* UNDERGROUND */}
@@ -590,13 +717,11 @@ export const PublicPortal: React.FC = () => {
                 </div>
 
                 <h3 className="mt-4 text-base font-bold text-[#071d35]">
-                  Select a Property
+                  Start a Property Inspection
                 </h3>
 
                 <p className="mt-2 max-w-xs text-xs leading-relaxed text-slate-500">
-                  Search for a parcel or select one of the sample
-                  cadastral records above to inspect its spatial
-                  information.
+                  Choose a city and select a building in the 3D viewer. Use the record search above to inspect backend-linked parcel and property records; those records are shown separately from the city dataset.
                 </p>
               </div>
             )}
@@ -606,11 +731,7 @@ export const PublicPortal: React.FC = () => {
         {/* =======================================================
             GUIDED ASSISTANT
         ======================================================= */}
-        <GuidedAssistant
-          selectedProperty={selectedProperty}
-          validation={validation}
-          confidence={confidence}
-        />
+        <GuidedAssistant />
       </main>
 
       {/* =========================================================

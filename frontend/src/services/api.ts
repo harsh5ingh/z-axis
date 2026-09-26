@@ -150,6 +150,14 @@ export interface SimulationResponse {
   [key: string]: unknown;
 }
 
+export interface AssistantChatResponse {
+  reply: string;
+  providerConfigured: boolean;
+  model?: string;
+  fallback?: boolean;
+  scopeRejected?: boolean;
+}
+
 /* ==========================================================================
    REQUEST TYPES
 ========================================================================== */
@@ -760,6 +768,13 @@ export const api = {
         }),
       },
     ),
+
+  chatWithAssistant: (message: string, language: string) =>
+    request<AssistantChatResponse>("/api/ai/assistant-chat", {
+      method: "POST",
+      auth: false,
+      body: JSON.stringify({ message, language }),
+    }),
 
   /* ========================================================================
      SIMULATIONS

@@ -51,7 +51,7 @@ export const IssueReportModal: React.FC<IssueReportModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50">
           <div>
-            <h3 className="text-base font-bold text-slate-800">Report Suspected Property Discrepancy</h3>
+            <h3 className="text-base font-bold text-slate-800">Report a Property Data Issue</h3>
             <p className="text-xs text-slate-500 font-mono mt-0.5">
               Target ID: {property.proposed_3d_id}
             </p>
@@ -71,9 +71,9 @@ export const IssueReportModal: React.FC<IssueReportModalProps> = ({
               <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
                 <CheckCircle2 className="w-8 h-8" />
               </div>
-              <h4 className="text-lg font-bold text-slate-800">Report Submitted Successfully</h4>
+              <h4 className="text-lg font-bold text-slate-800">Prototype Report Recorded</h4>
               <p className="text-sm text-slate-600">
-                Your report has been forwarded to the Department of Land Resources inspection queue.
+                The configured GeoVISTA backend returned this reference code. This confirmation does not mean the report was delivered to a government department.
               </p>
               <div className="p-3 bg-slate-100 rounded-lg text-xs font-mono font-bold text-slate-800 inline-block">
                 Reference Code: {successCode}
@@ -89,6 +89,9 @@ export const IssueReportModal: React.FC<IssueReportModalProps> = ({
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
+              <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-900">
+                Prototype issue-report workflow · not an official government grievance filing.
+              </p>
               {error && (
                 <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-lg flex items-center space-x-2">
                   <AlertCircle className="w-4 h-4 shrink-0" />
@@ -119,7 +122,7 @@ export const IssueReportModal: React.FC<IssueReportModalProps> = ({
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Unit height appears higher than registered floor plan"
+                  placeholder="e.g. Displayed building height differs from observed site conditions"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   className="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600"
@@ -142,7 +145,7 @@ export const IssueReportModal: React.FC<IssueReportModalProps> = ({
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Citizen Contact Email
+                  Contact Email
                 </label>
                 <input
                   type="email"
@@ -168,7 +171,7 @@ export const IssueReportModal: React.FC<IssueReportModalProps> = ({
                   className="px-5 py-2 text-sm font-semibold text-white bg-blue-900 hover:bg-blue-800 rounded-lg transition flex items-center space-x-2 disabled:opacity-50"
                 >
                   <Send className="w-4 h-4" />
-                  <span>{loading ? 'Submitting...' : 'Submit to Officer'}</span>
+                  <span>{loading ? 'Submitting...' : 'Submit prototype report'}</span>
                 </button>
               </div>
             </form>

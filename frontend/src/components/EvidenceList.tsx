@@ -15,6 +15,13 @@ export const EvidenceList: React.FC<EvidenceListProps> = ({ evidences }) => {
     );
   }
 
+  const syntheticCount = evidences.filter((evidence) => evidence.is_synthetic).length;
+  const provenanceLabel = syntheticCount === evidences.length
+    ? 'SYNTHETIC DEMO DATA'
+    : syntheticCount > 0
+      ? 'MIXED / CHECK SOURCES'
+      : 'SOURCE-LINKED RECORDS';
+
   const getIcon = (type: string) => {
     switch (type) {
       case 'DRONE_IMAGERY':
@@ -41,7 +48,7 @@ export const EvidenceList: React.FC<EvidenceListProps> = ({ evidences }) => {
           Attached Spatial Evidence ({evidences.length})
         </h4>
         <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-          SYNTHETIC DEMO DATA
+          {provenanceLabel}
         </span>
       </div>
 
@@ -65,7 +72,7 @@ export const EvidenceList: React.FC<EvidenceListProps> = ({ evidences }) => {
                   </span>
                 </div>
               </div>
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
+              <span title="Prototype evidence quality score; not a survey certification" className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700">
                 {e.quality_score}%
               </span>
             </div>
@@ -75,8 +82,10 @@ export const EvidenceList: React.FC<EvidenceListProps> = ({ evidences }) => {
             </p>
 
             <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-200/50">
-              <span>Date: {e.acquisition_date}</span>
-              <span className="text-blue-600 font-medium">Verified Source</span>
+              <span>Source date: {e.acquisition_date}</span>
+              <span className="text-slate-600 font-medium" title="This is the record's stored status, not independent source verification">
+                {e.is_synthetic ? 'Prototype' : 'Record'} status: {e.status}
+              </span>
             </div>
           </div>
         ))}

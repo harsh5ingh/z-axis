@@ -16,9 +16,6 @@ import {
   Building2,
   Activity,
   Gavel,
-  Instagram,
-  Linkedin,
-  Youtube,
   MapPinned,
 } from "lucide-react";
 
@@ -677,38 +674,28 @@ export const HomePage: React.FC<HomePageProps> = ({
         {/* MAIN FOOTER */}
         <div className="mx-auto max-w-[1450px] px-6 py-4 lg:px-12">
 
-          <div className="grid items-start gap-5 lg:grid-cols-[1.55fr_0.8fr_0.8fr_1.15fr_0.8fr]">
+          <div className="grid grid-cols-2 items-start gap-x-4 gap-y-4 sm:gap-5 lg:grid-cols-[1.55fr_0.8fr_0.8fr_1.15fr_0.8fr]">
 
             {/* =====================================================
-                SURVEY OF INDIA / GOVERNMENT
+                GEOVISTA PROJECT IDENTITY
             ===================================================== */}
 
-            <div className="min-w-0">
+            <div className="col-span-2 min-w-0 lg:col-span-1">
               <div className="flex items-center gap-3">
 
-                <div className="flex h-[82px] w-[92px] shrink-0 items-center justify-center">
-                  <img
-                    src="/assets/survey-of-india-emblem.png"
-                    alt="Survey of India emblem"
-                    className="h-full w-full object-contain"
-                  />
-                </div>
+                <img src="/assets/survey-of-india-emblem.png" alt="Survey of India emblem, used as a project reference" className="h-[58px] w-[44px] shrink-0 object-contain" />
 
                 <div className="min-w-0 leading-tight">
                   <p className="text-[15px] font-semibold text-white">
-                    भारतीय सर्वेक्षण विभाग
+                    GeoVISTA
                   </p>
 
                   <p className="mt-0.5 text-[18px] font-bold tracking-tight text-white">
-                    Survey of India
+                    3D ULPIN &amp; Vertical Mapping
                   </p>
 
                   <p className="mt-1 text-[10px] text-slate-300">
-                    Ministry of Science &amp; Technology
-                  </p>
-
-                  <p className="text-[10px] text-slate-300">
-                    Government of India
+                    SIH 2026 · Problem SIH26011
                   </p>
                 </div>
 
@@ -736,14 +723,14 @@ export const HomePage: React.FC<HomePageProps> = ({
                   href="#contact"
                   className="block transition-colors hover:text-white"
                 >
-                  Ministry of Science &amp; Technology
+                  3D ULPIN prototype
                 </a>
 
                 <a
                   href="#contact"
                   className="block transition-colors hover:text-white"
                 >
-                  Survey of India
+                  Data provenance
                 </a>
 
                 <a
@@ -826,88 +813,30 @@ export const HomePage: React.FC<HomePageProps> = ({
             </div>
 
             {/* =====================================================
-                CONNECT WITH US
+                DATA PROVENANCE
             ===================================================== */}
 
             <div className="min-w-0">
               <h3 className="mb-2 text-[13px] font-bold tracking-wide text-white">
-                Connect With Us
+                Data Provenance
               </h3>
 
-              <div className="mb-3 flex items-center gap-2">
-
-                {/* X */}
-                <a
-                  href="https://x.com/india_soi"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Survey of India on X"
-                  title="Survey of India - X"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 bg-white/[0.03] text-[11px] font-bold text-white transition-all hover:border-white/40 hover:bg-white/10"
-                >
-                  X
-                </a>
-
-                {/* LINKEDIN */}
-                <a
-                  href="https://www.linkedin.com/company/surveyofindia/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Survey of India on LinkedIn"
-                  title="Survey of India - LinkedIn"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 bg-white/[0.03] text-white transition-all hover:border-white/40 hover:bg-white/10"
-                >
-                  <Linkedin className="h-4 w-4" />
-                </a>
-
-                {/* YOUTUBE */}
-                <a
-                  href="https://www.youtube.com/@surveyofindia1767"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Survey of India on YouTube"
-                  title="Survey of India - YouTube"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 bg-white/[0.03] text-white transition-all hover:border-white/40 hover:bg-white/10"
-                >
-                  <Youtube className="h-4 w-4" />
-                </a>
-
-                {/* INSTAGRAM */}
-                <a
-                  href="https://www.instagram.com/surveyofindia/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Survey of India on Instagram"
-                  title="Survey of India - Instagram"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 bg-white/[0.03] text-white transition-all hover:border-white/40 hover:bg-white/10"
-                >
-                  <Instagram className="h-4 w-4" />
-                </a>
-
-              </div>
-
-              <div className="flex max-w-[310px] items-start gap-2 text-[10px] leading-4 text-slate-300">
-                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-slate-200" />
-
-                <span>
-                  Survey of India, Hathibarkala Estate
-                  <br />
-                  Dehradun - 248001, Uttarakhand, India
-                </span>
+              <div className="space-y-2 text-[10px] leading-4 text-slate-300">
+                <p><span className="font-semibold text-white">Bhopal</span> · Primary project dataset</p>
+                <p><span className="font-semibold text-white">New York City</span> · Reference data</p>
+                <p>Prototype validation · Not legal cadastral validation</p>
               </div>
             </div>
 
             {/* =====================================================
-                AZADI KA AMRIT MAHOTSAV
+                DATA STATUS
             ===================================================== */}
 
             <div className="flex items-start justify-start lg:justify-end">
-              <div className="flex h-[82px] w-[150px] items-center justify-center">
-                <img
-                  src="/assets/azadi-amrit-mahotsav-75.png"
-                  alt="75 Azadi Ka Amrit Mahotsav"
-                  className="h-full w-full object-contain"
-                />
+              <div className="space-y-2 text-right text-[10px] leading-4 text-slate-300">
+                <p><span className="font-semibold text-emerald-300">ACTUAL</span> · Bhopal building dataset</p>
+                <p><span className="font-semibold text-amber-300">REFERENCE</span> · NYC public data</p>
+                <p><span className="font-semibold text-cyan-200">PROTOTYPE</span> · derived volumes &amp; checks</p>
               </div>
             </div>
 
@@ -915,7 +844,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
 
         {/* =======================================================
-            COPYRIGHT / GOVERNMENT INITIATIVE BAR
+            COPYRIGHT / PROTOTYPE SCOPE BAR
         ======================================================= */}
 
         <div className="border-t border-white/15">
@@ -927,12 +856,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             </span>
 
             <span className="text-center">
-              A Digital Initiative under Ministry of Science &amp; Technology,
-              Government of India
-            </span>
-
-            <span className="text-right">
-              Developed in collaboration with Survey of India
+              SIH 2026 prototype · Dataset sources and derived fields are labelled in the viewer
             </span>
 
           </div>

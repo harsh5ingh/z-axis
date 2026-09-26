@@ -26,3 +26,110 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+/* The navbar's existing appearance menu applies this scheme to every portal. */
+[data-color-scheme="dark"] body {
+  background: #0b1220;
+  color: #e2e8f0;
+}
+
+[data-color-scheme="dark"] #root .min-h-screen {
+  background-color: #0b1220 !important;
+}
+
+[data-color-scheme="dark"] #root .bg-white,
+[data-color-scheme="dark"] #root .bg-white\/95,
+[data-color-scheme="dark"] #root [class~="bg-white/90"],
+[data-color-scheme="dark"] #root [class~="bg-white/80"] {
+  background-color: #111c2c !important;
+}
+
+[data-color-scheme="dark"] #root .bg-slate-50,
+[data-color-scheme="dark"] #root .bg-slate-100 {
+  background-color: #172337 !important;
+}
+
+[data-color-scheme="dark"] #root [class~="bg-[#f6f9fc]"] {
+  background-color: #0b1220 !important;
+}
+
+/* The portal cards use light gradient utilities, which otherwise retain their
+   pale gradient even when the color scheme switches to dark. */
+[data-color-scheme="dark"] #root [class~="from-emerald-50"],
+[data-color-scheme="dark"] #root [class~="from-blue-50"] {
+  background-image: none !important;
+  background-color: #111c2c !important;
+}
+
+[data-color-scheme="dark"] #root [class~="to-white"] {
+  --tw-gradient-to: #111c2c var(--tw-gradient-to-position) !important;
+}
+
+[data-color-scheme="dark"] #root [class~="bg-slate-100"] {
+  background-color: #1b2a3d !important;
+}
+
+[data-color-scheme="dark"] #root [class~="text-[#071d35]"],
+[data-color-scheme="dark"] #root [class~="text-[#10284b]"],
+[data-color-scheme="dark"] #root .text-slate-900,
+[data-color-scheme="dark"] #root .text-slate-800,
+[data-color-scheme="dark"] #root .text-slate-700 {
+  color: #e2e8f0 !important;
+}
+
+[data-color-scheme="dark"] #root .text-slate-600,
+[data-color-scheme="dark"] #root .text-slate-500 {
+  color: #a7b4c7 !important;
+}
+
+[data-color-scheme="dark"] #root .border-slate-100,
+[data-color-scheme="dark"] #root .border-slate-200,
+[data-color-scheme="dark"] #root .border-slate-300 {
+  border-color: #2b3b51 !important;
+}
+
+[data-color-scheme="dark"] #root input:not([type="checkbox"]),
+[data-color-scheme="dark"] #root textarea,
+[data-color-scheme="dark"] #root select {
+  background-color: #0d1726 !important;
+  border-color: #34465e !important;
+  color: #e2e8f0 !important;
+}
+
+[data-color-scheme="dark"] #root .bg-blue-50,
+[data-color-scheme="dark"] #root .bg-emerald-50,
+[data-color-scheme="dark"] #root .bg-sky-50,
+[data-color-scheme="dark"] #root .bg-violet-50 {
+  background-color: #17283a !important;
+}
+
+[data-color-scheme="dark"] #root .bg-amber-50,
+[data-color-scheme="dark"] #root .bg-rose-50,
+[data-color-scheme="dark"] #root .bg-red-50 {
+  background-color: #2a2022 !important;
+}
+
+[data-color-scheme="dark"] #root .text-blue-900,
+[data-color-scheme="dark"] #root .text-blue-800,
+[data-color-scheme="dark"] #root .text-blue-700,
+[data-color-scheme="dark"] #root .text-emerald-900,
+[data-color-scheme="dark"] #root .text-emerald-800,
+[data-color-scheme="dark"] #root .text-emerald-700,
+[data-color-scheme="dark"] #root .text-amber-900,
+[data-color-scheme="dark"] #root .text-amber-800,
+[data-color-scheme="dark"] #root .text-rose-800 {
+  color: #dbeafe !important;
+}
+
+[data-color-scheme="dark"] #root .shadow-sm,
+[data-color-scheme="dark"] #root .shadow-xl,
+[data-color-scheme="dark"] #root .shadow-2xl {
+  --tw-shadow-color: rgb(0 0 0 / 0.25);
+}
+
+@media (max-width: 640px) {
+  [data-color-scheme="dark"] #root [class~="from-emerald-50"],
+  [data-color-scheme="dark"] #root [class~="from-blue-50"] {
+    border-color: #2b3b51 !important;
+  }
+}

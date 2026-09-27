@@ -115,7 +115,7 @@ export const EvidenceList: React.FC<EvidenceListProps> = ({
                 <div className="min-w-0">
 
                   <span className="block truncate text-xs font-bold leading-tight text-slate-800">
-                    {e.source_type.replaceAll("_", " ")}
+                    {e.source_type.replace(/_/g, " ")}
                   </span>
 
                   <span className="mt-0.5 block truncate font-mono text-[9px] uppercase tracking-wide text-slate-400">

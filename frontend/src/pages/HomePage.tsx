@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import {
   ArrowRight,
@@ -16,15 +16,17 @@ import {
   Building2,
   Activity,
   Gavel,
+  Instagram,
+  Linkedin,
+  Github,
+  Youtube,
   MapPinned,
+  X,
+  ExternalLink,
 } from "lucide-react";
 
 export type AuthMode = "signin" | "signup";
 export type PortalType = "public" | "officer";
-
-/* ==========================================================================
-   TYPES
-========================================================================== */
 
 interface HomePageProps {
   onPublic: () => void;
@@ -32,6 +34,51 @@ interface HomePageProps {
   onSignIn: () => void;
   onSignUp: () => void;
 }
+
+/* ==========================================================================
+   VIDEO CONFIGURATION
+========================================================================== */
+
+const VIDEO_URL =
+  import.meta.env.VITE_VIDEO_URL ||
+  "https://www.youtube.com/watch?v=YOUR_VIDEO_ID";
+
+/**
+ * Converts common YouTube URLs into an embeddable URL.
+ *
+ * Supported:
+ * - https://www.youtube.com/watch?v=VIDEO_ID
+ * - https://youtu.be/VIDEO_ID
+ * - https://www.youtube.com/shorts/VIDEO_ID
+ * - https://www.youtube.com/embed/VIDEO_ID
+ */
+const getYouTubeEmbedUrl = (url: string) => {
+  if (!url || url.includes("YOUR_VIDEO_ID")) {
+    return "";
+  }
+
+  try {
+    const parsedUrl = new URL(url);
+
+    let videoId = "";
+
+    if (parsedUrl.hostname.includes("youtu.be")) {
+      videoId = parsedUrl.pathname.replace("/", "").split("/")[0];
+    } else if (parsedUrl.pathname.includes("/shorts/")) {
+      videoId = parsedUrl.pathname.split("/shorts/")[1]?.split("/")[0] || "";
+    } else if (parsedUrl.pathname.includes("/embed/")) {
+      videoId = parsedUrl.pathname.split("/embed/")[1]?.split("/")[0] || "";
+    } else {
+      videoId = parsedUrl.searchParams.get("v") || "";
+    }
+
+    if (!videoId) return "";
+
+    return `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
+  } catch {
+    return "";
+  }
+};
 
 /* ==========================================================================
    HERO FEATURES
@@ -68,38 +115,32 @@ const features = [
   {
     icon: Box,
     title: "3D Visualization",
-    description:
-      "Interactive 3D cadastral maps with building models",
+    description: "Interactive 3D cadastral maps with building models",
   },
   {
     icon: MapPin,
     title: "ULPIN Integration",
-    description:
-      "Unique property identification and detailed information",
+    description: "Unique property identification and detailed information",
   },
   {
     icon: Layers,
     title: "AI-Assisted Validation",
-    description:
-      "Automated spatial and regulatory checks",
+    description: "Automated spatial and regulatory checks",
   },
   {
     icon: FileText,
     title: "Evidence Management",
-    description:
-      "Store and track documents and imagery",
+    description: "Store and track documents and imagery",
   },
   {
     icon: ShieldCheck,
     title: "Transparency & Audit",
-    description:
-      "Complete audit trail for trust and accountability",
+    description: "Complete audit trail for trust and accountability",
   },
   {
     icon: BarChart3,
     title: "Reports & Analytics",
-    description:
-      "Generate insights for better decision making",
+    description: "Generate insights for better decision making",
   },
 ];
 
@@ -156,19 +197,59 @@ export const HomePage: React.FC<HomePageProps> = ({
   onSignIn,
   onSignUp,
 }) => {
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
+
+  const videoEmbedUrl = getYouTubeEmbedUrl(VIDEO_URL);
+
+  /* ------------------------------------------------------------------------
+     Close modal with ESC + prevent background scrolling
+  ------------------------------------------------------------------------ */
+
+  useEffect(() => {
+    if (!isVideoOpen) return;
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsVideoOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isVideoOpen]);
+
+  const openVideo = () => {
+    if (!videoEmbedUrl) {
+      console.warn("VITE_VIDEO_URL is missing or invalid.");
+      return;
+    }
+
+    setIsVideoOpen(true);
+  };
+
+  const closeVideo = () => {
+    setIsVideoOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-white text-[#071d35]">
 
-      {/* =========================================================
+      {/* =====================================================================
           HERO
-      ========================================================= */}
+      ===================================================================== */}
 
       <section
         id="home"
         className="relative min-h-[570px] overflow-hidden bg-[#031b33]"
       >
-        {/* BACKGROUND IMAGE */}
-
+        {/* Background */}
         <div className="absolute inset-0">
           <img
             src="/assets/hero-background.jpg"
@@ -181,45 +262,37 @@ export const HomePage: React.FC<HomePageProps> = ({
           <div className="absolute inset-0 bg-gradient-to-t from-[#031b33]/75 via-transparent to-transparent" />
         </div>
 
-        {/* HERO CONTENT */}
-
+        {/* Hero Content */}
         <div className="relative mx-auto max-w-[1450px] px-6 py-16 lg:px-12 lg:py-20">
 
           <div className="max-w-[620px] text-white">
 
-            {/* BADGE */}
-
+            {/* Badge */}
             <div className="mb-5 inline-flex items-center rounded-full border border-blue-300/20 bg-[#0b4c79]/70 px-5 py-2 text-sm font-medium backdrop-blur-md">
               A Smart, Transparent and Digital Land Governance Platform
             </div>
 
-            {/* TITLE */}
-
+            {/* Title */}
             <h1 className="text-[58px] font-black leading-none tracking-tight sm:text-[68px] lg:text-[76px]">
               Geo
-              <span className="text-blue-500">
-                Vista
-              </span>
+              <span className="text-blue-500">Vista</span>
             </h1>
 
-            {/* SUBTITLE */}
-
+            {/* Subtitle */}
             <h2 className="mt-4 text-[27px] font-bold leading-tight sm:text-[32px] lg:text-[35px]">
               3D Spatial Intelligence for
               <br />
               Smarter Land Governance
             </h2>
 
-            {/* DESCRIPTION */}
-
+            {/* Description */}
             <p className="mt-5 max-w-[570px] text-[16px] leading-relaxed text-slate-200 sm:text-lg">
               A unified 3D cadastral platform for property visualization,
               ULPIN-based identification, spatial validation and
               evidence-driven land administration.
             </p>
 
-            {/* HERO BUTTONS */}
-
+            {/* Buttons */}
             <div className="mt-7 flex flex-wrap gap-5">
 
               <button
@@ -228,31 +301,28 @@ export const HomePage: React.FC<HomePageProps> = ({
                 className="flex items-center gap-3 rounded-xl bg-blue-600 px-7 py-4 font-bold text-white shadow-xl shadow-blue-950/30 transition hover:bg-blue-500"
               >
                 <UserRound className="h-5 w-5" />
-
                 Get Started
-
                 <ArrowRight className="h-5 w-5" />
               </button>
 
+              {/* WATCH VIDEO */}
               <button
                 type="button"
-                className="flex items-center gap-3 rounded-xl border-2 border-white/80 px-7 py-4 font-bold text-white transition hover:bg-white hover:text-slate-900"
+                onClick={openVideo}
+                className="group flex items-center gap-3 rounded-xl border-2 border-white/80 px-7 py-4 font-bold text-white transition-all duration-300 hover:border-white hover:bg-white hover:text-slate-900"
               >
-                <Play className="h-5 w-5 fill-current" />
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 transition group-hover:bg-blue-600 group-hover:text-white">
+                  <Play className="h-4 w-4 fill-current" />
+                </span>
 
                 Watch Video
               </button>
 
             </div>
-
           </div>
 
-          {/* =======================================================
-              ULPIN CARD
-          ======================================================= */}
-
+          {/* ULPIN CARD */}
           <div className="absolute right-8 top-24 hidden xl:block 2xl:right-16">
-
             <div className="w-[310px] rounded-2xl border border-white/40 bg-slate-900/70 p-5 text-white shadow-2xl backdrop-blur-xl">
 
               <div className="flex gap-4">
@@ -266,104 +336,73 @@ export const HomePage: React.FC<HomePageProps> = ({
                 </div>
 
                 <div>
-
-                  <p className="text-lg font-bold">
-                    ULPIN
-                  </p>
+                  <p className="text-lg font-bold">ULPIN</p>
 
                   <p className="text-sm font-semibold">
                     UP-14-27-003-01234
                   </p>
 
                   <div className="mt-4 space-y-1 text-xs text-slate-200">
-
                     <p>
                       Property Type&nbsp;&nbsp;
-                      <span className="text-white">
-                        Residential
-                      </span>
+                      <span className="text-white">Residential</span>
                     </p>
 
                     <p>
                       Area&nbsp;&nbsp;
-                      <span className="text-white">
-                        320 m²
-                      </span>
+                      <span className="text-white">320 m²</span>
                     </p>
 
                     <p>
                       Floors&nbsp;&nbsp;
-                      <span className="text-white">
-                        G + 4
-                      </span>
+                      <span className="text-white">G + 4</span>
                     </p>
-
                   </div>
 
                   <span className="mt-3 inline-flex items-center gap-1 rounded-full bg-emerald-500 px-3 py-1 text-[11px] font-bold">
                     <CheckCircle2 className="h-3 w-3" />
                     Verified
                   </span>
-
                 </div>
 
               </div>
-
             </div>
-
           </div>
 
-          {/* =======================================================
-              HERO FEATURE STRIP
-          ======================================================= */}
-
+          {/* Hero Feature Strip */}
           <div className="mt-14 grid grid-cols-2 gap-5 text-white md:grid-cols-3 lg:grid-cols-5">
-
-            {heroFeatures.map(
-              ({ label, icon: Icon }) => (
-                <div
-                  key={label}
-                  className="flex items-center gap-3"
-                >
-
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-600 shadow-lg">
-                    <Icon className="h-4 w-4" />
-                  </div>
-
-                  <span className="text-xs font-semibold sm:text-sm">
-                    {label}
-                  </span>
-
+            {heroFeatures.map(({ label, icon: Icon }) => (
+              <div
+                key={label}
+                className="flex items-center gap-3"
+              >
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-600 shadow-lg">
+                  <Icon className="h-4 w-4" />
                 </div>
-              ),
-            )}
 
+                <span className="text-xs font-semibold sm:text-sm">
+                  {label}
+                </span>
+              </div>
+            ))}
           </div>
 
         </div>
-
       </section>
 
-      {/* =========================================================
+      {/* =====================================================================
           PORTALS
-      ========================================================= */}
+      ===================================================================== */}
 
       <section className="mx-auto max-w-[1400px] px-6 py-5 lg:py-7">
-
         <div className="grid gap-5 lg:grid-cols-2">
 
-          {/* =======================================================
-              PUBLIC PORTAL
-          ======================================================= */}
-
+          {/* Public Portal */}
           <div className="rounded-2xl border border-emerald-100 bg-gradient-to-r from-emerald-50 to-white p-4 shadow-sm sm:p-5">
 
             <div className="flex gap-5">
 
-              {/* IMAGE */}
-
               <div className="hidden h-[138px] w-[185px] shrink-0 items-center justify-center overflow-hidden rounded-xl bg-emerald-100 sm:flex">
-
                 <div className="relative h-full w-full">
 
                   <img
@@ -379,15 +418,11 @@ export const HomePage: React.FC<HomePageProps> = ({
                   </div>
 
                 </div>
-
               </div>
-
-              {/* CONTENT */}
 
               <div className="flex-1">
 
                 <div className="flex items-center gap-3">
-
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-md">
                     <UserRound className="h-5 w-5" />
                   </div>
@@ -395,7 +430,6 @@ export const HomePage: React.FC<HomePageProps> = ({
                   <h2 className="text-2xl font-bold text-[#10284b]">
                     Public Portal
                   </h2>
-
                 </div>
 
                 <p className="mt-3 max-w-[480px] text-sm leading-relaxed text-slate-600">
@@ -411,9 +445,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                     className="flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-emerald-700"
                   >
                     <UserRound className="h-4 w-4" />
-
                     Sign In
-
                     <ArrowRight className="h-4 w-4" />
                   </button>
 
@@ -426,7 +458,6 @@ export const HomePage: React.FC<HomePageProps> = ({
                   </button>
 
                 </div>
-
               </div>
 
             </div>
@@ -440,18 +471,12 @@ export const HomePage: React.FC<HomePageProps> = ({
 
           </div>
 
-          {/* =======================================================
-              OFFICER PORTAL
-          ======================================================= */}
-
+          {/* Officer Portal */}
           <div className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 to-white p-4 shadow-sm sm:p-5">
 
             <div className="flex gap-5">
 
-              {/* IMAGE */}
-
               <div className="hidden h-[138px] w-[185px] shrink-0 items-center justify-center overflow-hidden rounded-xl bg-blue-100 sm:flex">
-
                 <div className="relative h-full w-full">
 
                   <img
@@ -467,15 +492,11 @@ export const HomePage: React.FC<HomePageProps> = ({
                   </div>
 
                 </div>
-
               </div>
-
-              {/* CONTENT */}
 
               <div className="flex-1">
 
                 <div className="flex items-center gap-3">
-
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 text-white shadow-md">
                     <Landmark className="h-5 w-5" />
                   </div>
@@ -483,7 +504,6 @@ export const HomePage: React.FC<HomePageProps> = ({
                   <h2 className="text-2xl font-bold text-[#10284b]">
                     Officer Portal
                   </h2>
-
                 </div>
 
                 <p className="mt-3 max-w-[480px] text-sm leading-relaxed text-slate-600">
@@ -499,9 +519,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                     className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-700"
                   >
                     <UserRound className="h-4 w-4" />
-
                     Sign In
-
                     <ArrowRight className="h-4 w-4" />
                   </button>
 
@@ -514,13 +532,12 @@ export const HomePage: React.FC<HomePageProps> = ({
                   </button>
 
                 </div>
-
               </div>
 
             </div>
 
             <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-xs font-semibold text-slate-600">
-              <span>✓ Verify & Validate</span>
+              <span>✓ Verify &amp; Validate</span>
               <span>✓ Manage Parcels</span>
               <span>✓ View LiDAR Data</span>
               <span>✓ Generate Reports</span>
@@ -529,18 +546,16 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
         </div>
-
       </section>
 
-      {/* =========================================================
+      {/* =====================================================================
           KEY FEATURES
-      ========================================================= */}
+      ===================================================================== */}
 
       <section
         id="features"
         className="mx-auto max-w-[1400px] px-6 py-8 lg:py-10"
       >
-
         <div className="mb-9 text-center">
 
           <h2 className="text-3xl font-black text-[#071d35]">
@@ -550,17 +565,12 @@ export const HomePage: React.FC<HomePageProps> = ({
           <p className="mt-2 text-sm text-slate-500">
             Integrated geospatial intelligence for efficient land governance.
           </p>
-
         </div>
 
         <div className="grid grid-cols-2 gap-y-8 md:grid-cols-3 lg:grid-cols-6">
 
           {features.map(
-            ({
-              icon: Icon,
-              title,
-              description,
-            }, index) => (
+            ({ icon: Icon, title, description }, index) => (
               <div
                 key={title}
                 className={`px-5 text-center ${
@@ -587,18 +597,16 @@ export const HomePage: React.FC<HomePageProps> = ({
           )}
 
         </div>
-
       </section>
 
-      {/* =========================================================
+      {/* =====================================================================
           USE CASES
-      ========================================================= */}
+      ===================================================================== */}
 
       <section
         id="use-cases"
         className="mx-auto max-w-[1400px] px-6 pb-14 pt-6"
       >
-
         <div className="mb-7 text-center">
 
           <h2 className="text-3xl font-black text-[#071d35]">
@@ -615,12 +623,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
 
           {useCases.map(
-            ({
-              title,
-              subtitle,
-              icon: Icon,
-              image,
-            }) => (
+            ({ title, subtitle, icon: Icon, image }) => (
               <div
                 key={title}
                 className="group relative h-[120px] overflow-hidden rounded-xl shadow-md"
@@ -637,11 +640,9 @@ export const HomePage: React.FC<HomePageProps> = ({
                 <div className="relative flex h-full flex-col justify-end p-4 text-white">
 
                   <div className="mb-auto">
-
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/15 backdrop-blur-sm">
                       <Icon className="h-4 w-4 text-white" />
                     </div>
-
                   </div>
 
                   <h3 className="text-sm font-bold leading-tight">
@@ -659,59 +660,69 @@ export const HomePage: React.FC<HomePageProps> = ({
           )}
 
         </div>
-
       </section>
 
-      {/* =========================================================
+      {/* =====================================================================
           FOOTER
-      ========================================================= */}
+      ===================================================================== */}
 
       <footer
         id="contact"
         className="bg-[#031b33] text-white"
       >
 
-        {/* MAIN FOOTER */}
-        <div className="mx-auto max-w-[1450px] px-6 py-4 lg:px-12">
+        <div className="mx-auto max-w-[1450px] px-6 py-5 lg:px-12">
 
-          <div className="grid grid-cols-2 items-start gap-x-4 gap-y-4 sm:gap-5 lg:grid-cols-[1.55fr_0.8fr_0.8fr_1.15fr_0.8fr]">
+          <div className="grid items-start gap-6 sm:grid-cols-2 lg:grid-cols-[1.55fr_0.8fr_0.8fr_1.15fr_0.8fr]">
 
-            {/* =====================================================
-                GEOVISTA PROJECT IDENTITY
-            ===================================================== */}
+            {/* SURVEY OF INDIA */}
 
-            <div className="col-span-2 min-w-0 lg:col-span-1">
+            <div className="min-w-0">
+
               <div className="flex items-center gap-3">
 
-                <img src="/assets/survey-of-india-emblem.png" alt="Survey of India emblem, used as a project reference" className="h-[58px] w-[44px] shrink-0 object-contain" />
+                <div className="flex h-[82px] w-[92px] shrink-0 items-center justify-center">
+                  <img
+                    src="/assets/survey-of-india-emblem.png"
+                    alt="Survey of India emblem"
+                    className="h-full w-full object-contain"
+                  />
+                </div>
 
                 <div className="min-w-0 leading-tight">
+
                   <p className="text-[15px] font-semibold text-white">
-                    GeoVISTA
+                    भारतीय सर्वेक्षण विभाग
                   </p>
 
                   <p className="mt-0.5 text-[18px] font-bold tracking-tight text-white">
-                    3D ULPIN &amp; Vertical Mapping
+                    Survey of India
                   </p>
 
                   <p className="mt-1 text-[10px] text-slate-300">
-                    SIH 2026 · Problem SIH26011
+                    Ministry of Science &amp; Technology
                   </p>
+
+                  <p className="text-[10px] text-slate-300">
+                    Government of India
+                  </p>
+
                 </div>
 
               </div>
+
             </div>
 
-            {/* =====================================================
-                ABOUT
-            ===================================================== */}
+            {/* ABOUT */}
 
             <div>
+
               <h3 className="mb-2 text-[13px] font-bold tracking-wide text-white">
                 About
               </h3>
 
               <div className="space-y-1 text-[10px] leading-4 text-slate-300">
+
                 <a
                   href="#home"
                   className="block transition-colors hover:text-white"
@@ -723,14 +734,14 @@ export const HomePage: React.FC<HomePageProps> = ({
                   href="#contact"
                   className="block transition-colors hover:text-white"
                 >
-                  3D ULPIN prototype
+                  Ministry of Science &amp; Technology
                 </a>
 
                 <a
                   href="#contact"
                   className="block transition-colors hover:text-white"
                 >
-                  Data provenance
+                  Survey of India
                 </a>
 
                 <a
@@ -753,19 +764,21 @@ export const HomePage: React.FC<HomePageProps> = ({
                 >
                   Accessibility
                 </a>
+
               </div>
+
             </div>
 
-            {/* =====================================================
-                QUICK LINKS
-            ===================================================== */}
+            {/* QUICK LINKS */}
 
             <div>
+
               <h3 className="mb-2 text-[13px] font-bold tracking-wide text-white">
                 Quick Links
               </h3>
 
               <div className="space-y-1 text-[10px] leading-4 text-slate-300">
+
                 <button
                   type="button"
                   onClick={onPublic}
@@ -809,43 +822,118 @@ export const HomePage: React.FC<HomePageProps> = ({
                 >
                   Sitemap
                 </a>
+
               </div>
+
             </div>
 
-            {/* =====================================================
-                DATA PROVENANCE
-            ===================================================== */}
+            {/* CONNECT WITH US */}
 
             <div className="min-w-0">
+
               <h3 className="mb-2 text-[13px] font-bold tracking-wide text-white">
-                Data Provenance
+                Connect With Us
               </h3>
 
-              <div className="space-y-2 text-[10px] leading-4 text-slate-300">
-                <p><span className="font-semibold text-white">Bhopal</span> · Primary project dataset</p>
-                <p><span className="font-semibold text-white">New York City</span> · Reference data</p>
-                <p>Prototype validation · Not legal cadastral validation</p>
+              <div className="mb-3 flex items-center gap-2">
+
+                {/* X */}
+                <a
+                  href="https://x.com/india_soi"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Survey of India on X"
+                  title="Survey of India - X"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 bg-white/[0.03] text-[11px] font-bold text-white transition-all hover:border-white/40 hover:bg-white/10"
+                >
+                  X
+                </a>
+
+                {/* LinkedIn */}
+                <a
+                  href="https://www.linkedin.com/company/surveyofindia/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Survey of India on LinkedIn"
+                  title="Survey of India - LinkedIn"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 bg-white/[0.03] text-white transition-all hover:border-white/40 hover:bg-white/10"
+                >
+                  <Linkedin className="h-4 w-4" />
+                </a>
+
+                {/* YouTube */}
+                <a
+                  href="https://www.youtube.com/@surveyofindia1767"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Survey of India on YouTube"
+                  title="Survey of India - YouTube"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 bg-white/[0.03] text-white transition-all hover:border-white/40 hover:bg-white/10"
+                >
+                  <Youtube className="h-4 w-4" />
+                </a>
+
+                {/* Instagram */}
+                <a
+                  href="https://www.instagram.com/surveyofindia/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Survey of India on Instagram"
+                  title="Survey of India - Instagram"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 bg-white/[0.03] text-white transition-all hover:border-white/40 hover:bg-white/10"
+                >
+                  <Instagram className="h-4 w-4" />
+                </a>
+
+                {/* GitHub */}
+                <a
+                  href="https://github.com/harsh5ingh/z-axis"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="GeoVista GitHub Repository"
+                  title="GeoVista - GitHub Repository"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 bg-white/[0.03] text-white transition-all hover:border-white/40 hover:bg-white/10"
+                >
+                  <Github className="h-4 w-4" />
+                </a>
+
               </div>
+
+              <div className="flex max-w-[310px] items-start gap-2 text-[10px] leading-4 text-slate-300">
+
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-slate-200" />
+
+                <span>
+                  Survey of India, Hathibarkala Estate
+                  <br />
+                  Dehradun - 248001, Uttarakhand, India
+                </span>
+
+              </div>
+
             </div>
 
-            {/* =====================================================
-                DATA STATUS
-            ===================================================== */}
+            {/* AZADI KA AMRIT MAHOTSAV */}
 
             <div className="flex items-start justify-start lg:justify-end">
-              <div className="space-y-2 text-right text-[10px] leading-4 text-slate-300">
-                <p><span className="font-semibold text-emerald-300">ACTUAL</span> · Bhopal building dataset</p>
-                <p><span className="font-semibold text-amber-300">REFERENCE</span> · NYC public data</p>
-                <p><span className="font-semibold text-cyan-200">PROTOTYPE</span> · derived volumes &amp; checks</p>
+
+              <div className="flex h-[82px] w-[150px] items-center justify-center">
+
+                <img
+                  src="/assets/azadi-amrit-mahotsav-75.png"
+                  alt="75 Azadi Ka Amrit Mahotsav"
+                  className="h-full w-full object-contain"
+                />
+
               </div>
+
             </div>
 
           </div>
+
         </div>
 
-        {/* =======================================================
-            COPYRIGHT / PROTOTYPE SCOPE BAR
-        ======================================================= */}
+        {/* COPYRIGHT BAR */}
 
         <div className="border-t border-white/15">
 
@@ -856,7 +944,12 @@ export const HomePage: React.FC<HomePageProps> = ({
             </span>
 
             <span className="text-center">
-              SIH 2026 prototype · Dataset sources and derived fields are labelled in the viewer
+              A Digital Initiative under Ministry of Science &amp; Technology,
+              Government of India
+            </span>
+
+            <span className="text-right">
+              Developed in collaboration with Survey of India
             </span>
 
           </div>
@@ -864,6 +957,103 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
 
       </footer>
+
+      {/* =====================================================================
+          VIDEO MODAL
+      ===================================================================== */}
+
+      {isVideoOpen && videoEmbedUrl && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-3 backdrop-blur-sm sm:p-6"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              closeVideo();
+            }
+          }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="GeoVista introduction video"
+        >
+
+          {/* Modal Container */}
+          <div
+            className="relative w-full max-w-5xl overflow-hidden rounded-2xl border border-white/15 bg-[#071d35] shadow-[0_25px_100px_rgba(0,0,0,0.65)] animate-in fade-in zoom-in-95 duration-200"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-white/10 bg-[#071d35] px-4 py-3 sm:px-5">
+
+              <div className="flex items-center gap-3">
+
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600">
+                  <Play className="h-4 w-4 fill-current text-white" />
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-bold text-white sm:text-base">
+                    GeoVista — 3D ULPIN Platform
+                  </h3>
+
+                  <p className="hidden text-[11px] text-slate-400 sm:block">
+                    3D Spatial Intelligence for Smarter Land Governance
+                  </p>
+                </div>
+
+              </div>
+
+              {/* Close Button */}
+              <button
+                type="button"
+                onClick={closeVideo}
+                aria-label="Close video"
+                title="Close"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-300 transition-all hover:bg-white/15 hover:text-white"
+              >
+                <X className="h-5 w-5" />
+              </button>
+
+            </div>
+
+            {/* Video */}
+            <div className="relative aspect-video w-full bg-black">
+
+              <iframe
+                key={videoEmbedUrl}
+                src={videoEmbedUrl}
+                title="GeoVista 3D ULPIN Platform Introduction"
+                className="absolute inset-0 h-full w-full"
+                allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                allowFullScreen
+                referrerPolicy="strict-origin-when-cross-origin"
+              />
+
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex flex-col gap-3 bg-[#071d35] px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+
+              <div className="flex items-center gap-2 text-[11px] text-slate-400">
+                <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                GeoVista 3D ULPIN Platform
+              </div>
+
+              {/* Optional YouTube Link */}
+              <a
+                href={VIDEO_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-slate-300 transition hover:bg-white/10 hover:text-white"
+              >
+                Watch on YouTube
+                <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+
+            </div>
+
+          </div>
+        </div>
+      )}
 
     </div>
   );

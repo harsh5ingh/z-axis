@@ -472,7 +472,8 @@ router.post(
         message:
           "Account created successfully.",
 
-        token,
+        access_token: token,
+        token_type: "bearer",
 
         user:
           publicUser(user),
@@ -556,7 +557,8 @@ router.post(
           message:
             "Demo Officer signed in successfully.",
 
-          token,
+          access_token: token,
+          token_type: "bearer",
 
           user: {
             ...DEMO_OFFICER,
@@ -672,7 +674,8 @@ router.post(
         message:
           "Signed in successfully.",
 
-        token,
+        access_token: token,
+        token_type: "bearer",
 
         user:
           publicUser(user),

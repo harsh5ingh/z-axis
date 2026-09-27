@@ -87,15 +87,8 @@ const getStoredUser = (): AuthUser | null => {
 };
 
 const setAuth = (data: AuthResponse): void => {
-  localStorage.setItem(
-    TOKEN_KEY,
-    data.access_token,
-  );
-
-  localStorage.setItem(
-    USER_KEY,
-    JSON.stringify(data.user),
-  );
+  localStorage.setItem(TOKEN_KEY, data.access_token);
+  localStorage.setItem(USER_KEY, JSON.stringify(data.user));
 };
 
 const clearAuth = (): void => {
@@ -151,11 +144,14 @@ export interface SimulationResponse {
 }
 
 export interface AssistantChatResponse {
-  reply: string;
+  success?: boolean;
+  reply: string | null;
   providerConfigured: boolean;
   model?: string;
   fallback?: boolean;
   scopeRejected?: boolean;
+  rateLimited?: boolean;
+  message?: string;
 }
 
 /* ==========================================================================
@@ -179,11 +175,7 @@ async function handleResponse<T>(
   let payload: unknown = null;
 
   try {
-    if (
-      contentType.includes(
-        "application/json",
-      )
-    ) {
+    if (contentType.includes("application/json")) {
       payload = await response.json();
     } else {
       payload = await response.text();
@@ -193,8 +185,7 @@ async function handleResponse<T>(
   }
 
   if (!response.ok) {
-    let message =
-      `HTTP ${response.status}`;
+    let message = `HTTP ${response.status}`;
 
     if (
       typeof payload === "string" &&
@@ -207,26 +198,13 @@ async function handleResponse<T>(
       payload &&
       typeof payload === "object"
     ) {
-      const data =
-        payload as Record<
-          string,
-          unknown
-        >;
+      const data = payload as Record<string, unknown>;
 
-      if (
-        typeof data.detail ===
-        "string"
-      ) {
+      if (typeof data.detail === "string") {
         message = data.detail;
-      } else if (
-        typeof data.message ===
-        "string"
-      ) {
+      } else if (typeof data.message === "string") {
         message = data.message;
-      } else if (
-        typeof data.error ===
-        "string"
-      ) {
+      } else if (typeof data.error === "string") {
         message = data.error;
       }
     }
@@ -251,18 +229,11 @@ async function request<T>(
     ...fetchOptions
   } = options;
 
-  const requestHeaders =
-    new Headers(headers);
+  const requestHeaders = new Headers(headers);
 
-  /*
-   * Automatically send JSON content type
-   * whenever a request contains a body.
-   */
   if (
     fetchOptions.body &&
-    !requestHeaders.has(
-      "Content-Type",
-    )
+    !requestHeaders.has("Content-Type")
   ) {
     requestHeaders.set(
       "Content-Type",
@@ -270,10 +241,6 @@ async function request<T>(
     );
   }
 
-  /*
-   * Attach JWT when authentication
-   * is enabled.
-   */
   if (auth) {
     const token = getToken();
 
@@ -306,23 +273,11 @@ async function request<T>(
     );
   }
 
-  /*
-   * If token expired/invalid, clear local
-   * authentication state.
-   *
-   * Do not redirect here. The React app
-   * should decide where to navigate.
-   */
-  if (
-    response.status === 401 &&
-    auth
-  ) {
+  if (response.status === 401 && auth) {
     clearAuth();
   }
 
-  return handleResponse<T>(
-    response,
-  );
+  return handleResponse<T>(response);
 }
 
 /* ==========================================================================
@@ -330,9 +285,9 @@ async function request<T>(
 ========================================================================== */
 
 export const api = {
-  /* ========================================================================
+  /* ------------------------------------------------------------------------
      HEALTH
-  ======================================================================== */
+  ------------------------------------------------------------------------ */
 
   getHealth: (): Promise<{
     status: string;
@@ -342,9 +297,9 @@ export const api = {
       auth: false,
     }),
 
-  /* ========================================================================
+  /* ------------------------------------------------------------------------
      AUTHENTICATION
-  ======================================================================== */
+  ------------------------------------------------------------------------ */
 
   signup: async (
     data: SignupData,
@@ -391,9 +346,7 @@ export const api = {
     if (response.user) {
       localStorage.setItem(
         USER_KEY,
-        JSON.stringify(
-          response.user,
-        ),
+        JSON.stringify(response.user),
       );
     }
 
@@ -406,40 +359,34 @@ export const api = {
 
   getToken,
 
-  getCurrentUser:
-    (): AuthUser | null => {
-      return getStoredUser();
-    },
+  getCurrentUser: (): AuthUser | null => {
+    return getStoredUser();
+  },
 
-  isAuthenticated:
-    (): boolean => {
-      return Boolean(getToken());
-    },
+  isAuthenticated: (): boolean => {
+    return Boolean(getToken());
+  },
 
-  /* ========================================================================
+  /* ------------------------------------------------------------------------
      SEARCH
-  ======================================================================== */
+  ------------------------------------------------------------------------ */
 
   search: (
     query: string,
   ): Promise<SearchResponse> =>
     request<SearchResponse>(
-      `/api/search?q=${encodeURIComponent(
-        query,
-      )}`,
+      `/api/search?q=${encodeURIComponent(query)}`,
     ),
 
-  /* ========================================================================
+  /* ------------------------------------------------------------------------
      PARCELS
-  ======================================================================== */
+  ------------------------------------------------------------------------ */
 
   getParcels: (
     areaType?: "URBAN" | "RURAL",
   ): Promise<Parcel[]> => {
     const query = areaType
-      ? `?area_type=${encodeURIComponent(
-          areaType,
-        )}`
+      ? `?area_type=${encodeURIComponent(areaType)}`
       : "";
 
     return request<Parcel[]>(
@@ -451,9 +398,7 @@ export const api = {
     id: string,
   ): Promise<Parcel> =>
     request<Parcel>(
-      `/api/parcels/${encodeURIComponent(
-        id,
-      )}`,
+      `/api/parcels/${encodeURIComponent(id)}`,
     ),
 
   getParcelBuildings: (
@@ -492,32 +437,25 @@ export const api = {
       )}/evidence`,
     ),
 
-  /* ========================================================================
+  /* ------------------------------------------------------------------------
      BUILDINGS
-  ======================================================================== */
+  ------------------------------------------------------------------------ */
 
-  getBuildings:
-    (): Promise<Building[]> =>
-      request<Building[]>(
-        "/api/buildings",
-      ),
+  getBuildings: (): Promise<Building[]> =>
+    request<Building[]>("/api/buildings"),
 
   getBuilding: (
     id: string,
   ): Promise<Building> =>
     request<Building>(
-      `/api/buildings/${encodeURIComponent(
-        id,
-      )}`,
+      `/api/buildings/${encodeURIComponent(id)}`,
     ),
 
   getBuildingFloors: (
     id: string,
   ): Promise<Floor[]> =>
     request<Floor[]>(
-      `/api/buildings/${encodeURIComponent(
-        id,
-      )}/floors`,
+      `/api/buildings/${encodeURIComponent(id)}/floors`,
     ),
 
   getBuildingProperties: (
@@ -529,23 +467,18 @@ export const api = {
       )}/properties`,
     ),
 
-  /* ========================================================================
+  /* ------------------------------------------------------------------------
      PROPERTIES
-  ======================================================================== */
+  ------------------------------------------------------------------------ */
 
-  getProperties:
-    (): Promise<PropertyUnit[]> =>
-      request<PropertyUnit[]>(
-        "/api/properties",
-      ),
+  getProperties: (): Promise<PropertyUnit[]> =>
+    request<PropertyUnit[]>("/api/properties"),
 
   getProperty: (
     id: string,
   ): Promise<PropertyUnit> =>
     request<PropertyUnit>(
-      `/api/properties/${encodeURIComponent(
-        id,
-      )}`,
+      `/api/properties/${encodeURIComponent(id)}`,
     ),
 
   getPropertyGeometry: (
@@ -596,39 +529,32 @@ export const api = {
       },
     ),
 
-  /* ========================================================================
+  /* ------------------------------------------------------------------------
      INFRASTRUCTURE
-  ======================================================================== */
+  ------------------------------------------------------------------------ */
 
-  getUnderground:
-    (): Promise<Infrastructure[]> =>
-      request<Infrastructure[]>(
-        "/api/infrastructures/underground",
-      ),
+  getUnderground: (): Promise<Infrastructure[]> =>
+    request<Infrastructure[]>(
+      "/api/infrastructures/underground",
+    ),
 
-  getElevated:
-    (): Promise<Infrastructure[]> =>
-      request<Infrastructure[]>(
-        "/api/infrastructures/elevated",
-      ),
+  getElevated: (): Promise<Infrastructure[]> =>
+    request<Infrastructure[]>(
+      "/api/infrastructures/elevated",
+    ),
 
-  /* ========================================================================
+  /* ------------------------------------------------------------------------
      REVIEWS
-  ======================================================================== */
+  ------------------------------------------------------------------------ */
 
-  getReviews:
-    (): Promise<ReviewCase[]> =>
-      request<ReviewCase[]>(
-        "/api/reviews",
-      ),
+  getReviews: (): Promise<ReviewCase[]> =>
+    request<ReviewCase[]>("/api/reviews"),
 
   getReview: (
     id: string,
   ): Promise<ReviewCase> =>
     request<ReviewCase>(
-      `/api/reviews/${encodeURIComponent(
-        id,
-      )}`,
+      `/api/reviews/${encodeURIComponent(id)}`,
     ),
 
   approveReview: (
@@ -641,9 +567,7 @@ export const api = {
       )}/approve`,
       {
         method: "POST",
-        body: JSON.stringify({
-          reason,
-        }),
+        body: JSON.stringify({ reason }),
       },
     ),
 
@@ -657,9 +581,7 @@ export const api = {
       )}/reject`,
       {
         method: "POST",
-        body: JSON.stringify({
-          reason,
-        }),
+        body: JSON.stringify({ reason }),
       },
     ),
 
@@ -673,24 +595,19 @@ export const api = {
     },
   ): Promise<PropertyUnit> =>
     request<PropertyUnit>(
-      `/api/reviews/${encodeURIComponent(
-        id,
-      )}/correct`,
+      `/api/reviews/${encodeURIComponent(id)}/correct`,
       {
         method: "POST",
         body: JSON.stringify(data),
       },
     ),
 
-  /* ========================================================================
+  /* ------------------------------------------------------------------------
      REPORTS
-  ======================================================================== */
+  ------------------------------------------------------------------------ */
 
-  getReports:
-    (): Promise<IssueReport[]> =>
-      request<IssueReport[]>(
-        "/api/reports",
-      ),
+  getReports: (): Promise<IssueReport[]> =>
+    request<IssueReport[]>("/api/reports"),
 
   submitReport: (
     data: {
@@ -701,21 +618,18 @@ export const api = {
       category?: string;
     },
   ): Promise<IssueReport> =>
-    request<IssueReport>(
-      "/api/reports",
-      {
-        method: "POST",
-        body: JSON.stringify(data),
-      },
-    ),
+    request<IssueReport>("/api/reports", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
 
-  /* ========================================================================
+  /* ------------------------------------------------------------------------
      LiDAR
-  ======================================================================== */
+  ------------------------------------------------------------------------ */
 
   analyzeLidar: (
     propertyId: string,
-  ) =>
+  ): Promise<LidarAnalysisResponse> =>
     request<LidarAnalysisResponse>(
       "/api/lidar/analyze",
       {
@@ -726,13 +640,13 @@ export const api = {
       },
     ),
 
-  /* ========================================================================
+  /* ------------------------------------------------------------------------
      AI
-  ======================================================================== */
+  ------------------------------------------------------------------------ */
 
   runBuildingExtraction: (
     parcelId: string,
-  ) =>
+  ): Promise<BuildingExtractionResponse> =>
     request<BuildingExtractionResponse>(
       "/api/ai/building-extraction",
       {
@@ -745,7 +659,7 @@ export const api = {
 
   runFloorSegmentation: (
     buildingId: string,
-  ) =>
+  ): Promise<FloorSegmentationResponse> =>
     request<FloorSegmentationResponse>(
       "/api/ai/floor-segmentation",
       {
@@ -758,7 +672,7 @@ export const api = {
 
   runVerticalDelineation: (
     buildingId: string,
-  ) =>
+  ): Promise<VerticalDelineationResponse> =>
     request<VerticalDelineationResponse>(
       "/api/ai/vertical-delineation",
       {
@@ -769,28 +683,46 @@ export const api = {
       },
     ),
 
-  chatWithAssistant: (message: string, language: string) =>
-    request<AssistantChatResponse>("/api/ai/assistant-chat", {
-      method: "POST",
-      auth: false,
-      body: JSON.stringify({ message, language }),
-    }),
-
-  /* ========================================================================
-     SIMULATIONS
-  ======================================================================== */
-
-  resetSimulation: () =>
-    request<{
-      message: string;
-    }>(
-      "/api/simulation/reset",
+  /*
+   * IMPORTANT:
+   * Your browser test successfully used:
+   * /api/assistant/chat
+   *
+   * So this frontend endpoint is aligned with that route.
+   */
+  chatWithAssistant: (
+    message: string,
+    language: string,
+    history: Array<{
+      role: "user" | "assistant";
+      content: string;
+    }> = [],
+  ): Promise<AssistantChatResponse> =>
+    request<AssistantChatResponse>(
+      "/api/assistant/chat",
       {
         method: "POST",
+        auth: false,
+        body: JSON.stringify({
+          message,
+          language,
+          history,
+        }),
       },
     ),
 
-  triggerSpatialError: () =>
+  /* ------------------------------------------------------------------------
+     SIMULATIONS
+  ------------------------------------------------------------------------ */
+
+  resetSimulation: (): Promise<{
+    message: string;
+  }> =>
+    request("/api/simulation/reset", {
+      method: "POST",
+    }),
+
+  triggerSpatialError: (): Promise<SimulationResponse> =>
     request<SimulationResponse>(
       "/api/simulation/spatial-error",
       {
@@ -798,7 +730,7 @@ export const api = {
       },
     ),
 
-  triggerMissingEvidence: () =>
+  triggerMissingEvidence: (): Promise<SimulationResponse> =>
     request<SimulationResponse>(
       "/api/simulation/missing-evidence",
       {
@@ -806,37 +738,37 @@ export const api = {
       },
     ),
 
-  triggerMultiSourceConflict: () =>
-    request<SimulationResponse>(
-      "/api/simulation/multi-source-conflict",
-      {
-        method: "POST",
-      },
-    ),
+  triggerMultiSourceConflict:
+    (): Promise<SimulationResponse> =>
+      request<SimulationResponse>(
+        "/api/simulation/multi-source-conflict",
+        {
+          method: "POST",
+        },
+      ),
 
-  getRuralCandidates: () =>
-    request<RuralCandidatesResponse>(
-      "/api/simulation/rural-structure",
-      {
-        method: "POST",
-      },
-    ),
+  getRuralCandidates:
+    (): Promise<RuralCandidatesResponse> =>
+      request<RuralCandidatesResponse>(
+        "/api/simulation/rural-structure",
+        {
+          method: "POST",
+        },
+      ),
 
-  /* ========================================================================
+  /* ------------------------------------------------------------------------
      AUDIT
-  ======================================================================== */
+  ------------------------------------------------------------------------ */
 
-  getAuditLog:
-    (): Promise<AuditEvent[]> =>
-      request<AuditEvent[]>(
-        "/api/audit",
-      ),
+  getAuditLog: (): Promise<AuditEvent[]> =>
+    request<AuditEvent[]>("/api/audit"),
 
-  getRevisions:
-    (): Promise<Record<string, unknown>[]> =>
-      request<Record<string, unknown>[]>(
-        "/api/audit/revisions",
-      ),
+  getRevisions: (): Promise<
+    Record<string, unknown>[]
+  > =>
+    request<Record<string, unknown>[]>(
+      "/api/audit/revisions",
+    ),
 };
 
 /* ==========================================================================
@@ -850,13 +782,17 @@ export const authStorage = {
   clearAuth,
 };
 
-
 /* ==========================================================================
    AUTH COMPATIBILITY EXPORTS
 ========================================================================== */
 
-export type PortalType = "public" | "officer";
-export type AuthMode = "signin" | "signup";
+export type PortalType =
+  | "public"
+  | "officer";
+
+export type AuthMode =
+  | "signin"
+  | "signup";
 
 export const authApi = {
   signup: api.signup,
@@ -865,7 +801,9 @@ export const authApi = {
   logout: api.logout,
 };
 
-export const saveAuthSession = (data: AuthResponse): void => {
+export const saveAuthSession = (
+  data: AuthResponse,
+): void => {
   authStorage.setAuth(data);
 };
 

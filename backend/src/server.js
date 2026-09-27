@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import "dotenv/config";
 
 import { settings } from "./config.js";
 
@@ -19,6 +20,11 @@ import ai from "./routes/ai.js";
 import search from "./routes/search.js";
 import simulation from "./routes/simulation.js";
 import audit from "./routes/audit.js";
+import assistantRouter from "./routes/assistant.js";
+
+// =========================
+// App
+// =========================
 
 const app = express();
 
@@ -29,7 +35,8 @@ const app = express();
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests from curl, Postman and server-to-server clients
+      // Allow requests without an Origin header
+      // such as curl, Postman and server-to-server requests.
       if (!origin) {
         return callback(null, true);
       }
@@ -109,7 +116,7 @@ app.get("/health", (_req, res) => {
 });
 
 // =========================
-// Minimal OpenAPI
+// OpenAPI
 // =========================
 
 app.get("/openapi.json", (_req, res) => {
@@ -142,6 +149,10 @@ app.get("/openapi.json", (_req, res) => {
         },
       },
 
+      // -------------------------
+      // Authentication
+      // -------------------------
+
       "/api/auth/signup": {
         post: {
           summary:
@@ -163,6 +174,10 @@ app.get("/openapi.json", (_req, res) => {
         },
       },
 
+      // -------------------------
+      // Core APIs
+      // -------------------------
+
       "/api/parcels": {
         get: {
           summary: "List parcels",
@@ -181,15 +196,73 @@ app.get("/openapi.json", (_req, res) => {
         },
       },
 
+      "/api/infrastructures": {
+        get: {
+          summary: "List infrastructure",
+        },
+      },
+
+      "/api/reviews": {
+        get: {
+          summary: "List reviews",
+        },
+      },
+
+      "/api/reports": {
+        get: {
+          summary: "List reports",
+        },
+      },
+
+      "/api/lidar": {
+        get: {
+          summary: "LiDAR API",
+        },
+      },
+
       "/api/search": {
         get: {
           summary: "Search GeoVISTA entities",
         },
       },
 
-      "/api/health": {
+      "/api/simulation": {
         get: {
-          summary: "API health",
+          summary: "Simulation API",
+        },
+      },
+
+      "/api/audit": {
+        get: {
+          summary: "Audit API",
+        },
+      },
+
+      // -------------------------
+      // AI APIs
+      // -------------------------
+
+      "/api/ai": {
+        get: {
+          summary: "AI API",
+        },
+      },
+
+      // -------------------------
+      // Guided Assistant
+      // -------------------------
+
+      "/api/assistant/status": {
+        get: {
+          summary:
+            "Get GeoVISTA Assistant status",
+        },
+      },
+
+      "/api/assistant/chat": {
+        post: {
+          summary:
+            "Chat with GeoVISTA Assistant",
         },
       },
     },
@@ -197,7 +270,7 @@ app.get("/openapi.json", (_req, res) => {
 });
 
 // =========================
-// Simple API Documentation
+// API Documentation
 // =========================
 
 app.get("/docs", (_req, res) => {
@@ -217,7 +290,6 @@ app.get("/docs", (_req, res) => {
   <title>GeoVISTA API</title>
 
   <style>
-
     body {
       font-family:
         system-ui,
@@ -228,6 +300,7 @@ app.get("/docs", (_req, res) => {
 
       background: #f8fafc;
       color: #0f172a;
+
       margin: 0;
       padding: 40px;
     }
@@ -243,8 +316,10 @@ app.get("/docs", (_req, res) => {
 
     .card {
       background: white;
+
       border: 1px solid #e2e8f0;
       border-radius: 14px;
+
       padding: 20px;
       margin: 15px 0;
 
@@ -254,7 +329,9 @@ app.get("/docs", (_req, res) => {
 
     code {
       background: #f1f5f9;
+
       padding: 4px 7px;
+
       border-radius: 6px;
     }
 
@@ -265,15 +342,27 @@ app.get("/docs", (_req, res) => {
 
     .method {
       display: inline-block;
+
       padding: 4px 8px;
+
       border-radius: 6px;
+
       background: #2563eb;
       color: white;
+
       font-size: 12px;
       font-weight: 700;
+
       margin-right: 8px;
     }
 
+    .get {
+      background: #16a34a;
+    }
+
+    .post {
+      background: #2563eb;
+    }
   </style>
 </head>
 
@@ -314,17 +403,17 @@ app.get("/docs", (_req, res) => {
     <h2>Authentication</h2>
 
     <p>
-      <span class="method">POST</span>
+      <span class="method post">POST</span>
       <code>/api/auth/signup</code>
     </p>
 
     <p>
-      <span class="method">POST</span>
+      <span class="method post">POST</span>
       <code>/api/auth/signin</code>
     </p>
 
     <p>
-      <span class="method">GET</span>
+      <span class="method get">GET</span>
       <code>/api/auth/me</code>
     </p>
 
@@ -345,6 +434,28 @@ app.get("/docs", (_req, res) => {
     <p><code>/api/search</code></p>
     <p><code>/api/simulation</code></p>
     <p><code>/api/audit</code></p>
+
+  </div>
+
+  <div class="card">
+
+    <h2>GeoVISTA Assistant</h2>
+
+    <p>
+      <span class="method get">GET</span>
+      <code>/api/assistant/status</code>
+    </p>
+
+    <p>
+      <span class="method post">POST</span>
+      <code>/api/assistant/chat</code>
+    </p>
+
+    <p>
+      Conversational GeoVISTA and 3D ULPIN
+      project assistant with rate limiting,
+      project-fact protection and LLM fallback.
+    </p>
 
   </div>
 
@@ -376,22 +487,84 @@ app.get("/docs", (_req, res) => {
 // API Routes
 // =========================
 
-app.use("/api/auth", auth);
+app.use(
+  "/api/auth",
+  auth
+);
 
-app.use("/api/parcels", parcels);
-app.use("/api/buildings", buildings);
-app.use("/api/properties", properties);
+app.use(
+  "/api/parcels",
+  parcels
+);
+
+app.use(
+  "/api/buildings",
+  buildings
+);
+
+app.use(
+  "/api/properties",
+  properties
+);
+
 app.use(
   "/api/infrastructures",
   infrastructures
 );
-app.use("/api/reviews", reviews);
-app.use("/api/reports", reports);
-app.use("/api/lidar", lidar);
-app.use("/api/ai", ai);
-app.use("/api/search", search);
-app.use("/api/simulation", simulation);
-app.use("/api/audit", audit);
+
+app.use(
+  "/api/reviews",
+  reviews
+);
+
+app.use(
+  "/api/reports",
+  reports
+);
+
+app.use(
+  "/api/lidar",
+  lidar
+);
+
+app.use(
+  "/api/ai",
+  ai
+);
+
+app.use(
+  "/api/search",
+  search
+);
+
+app.use(
+  "/api/simulation",
+  simulation
+);
+
+app.use(
+  "/api/audit",
+  audit
+);
+
+// =========================
+// Guided Assistant
+// =========================
+//
+// assistant.js internally handles:
+// - rate limiting
+// - /status
+// - /chat
+// - Groq
+// - project fact replies
+// - fallback handling
+//
+// Therefore we do NOT add another limiter here.
+
+app.use(
+  "/api/assistant",
+  assistantRouter
+);
 
 // =========================
 // 404 Handler
@@ -416,7 +589,7 @@ app.use(
     );
 
     if (
-      err.message ===
+      err?.message ===
       "CORS origin not allowed."
     ) {
       return res.status(403).json({
@@ -426,10 +599,10 @@ app.use(
     }
 
     return res.status(
-      err.status || 500
+      err?.status || 500
     ).json({
       detail:
-        err.message ||
+        err?.message ||
         "Internal server error",
     });
   }
@@ -453,21 +626,53 @@ app.listen(
     console.log(
       "========================================"
     );
+
     console.log(
       `Server : http://localhost:${settings.PORT}`
     );
+
     console.log(
       `Health : http://localhost:${settings.PORT}/health`
     );
+
     console.log(
       `Docs   : http://localhost:${settings.PORT}/docs`
     );
+
     console.log(
       `Env    : ${settings.APP_ENV}`
     );
+
+    console.log(
+      `Assistant : http://localhost:${settings.PORT}/api/assistant/chat`
+    );
+
+    console.log(
+      `Assistant Status : http://localhost:${settings.PORT}/api/assistant/status`
+    );
+
+    console.log(
+      `Assistant Rate Limit : ${
+        process.env.ASSISTANT_RATE_LIMIT || 10
+      } requests / ${
+        Number(
+          process.env.ASSISTANT_WINDOW_MS || 60000
+        ) / 1000
+      } seconds`
+    );
+
+    console.log(
+      `Groq LLM : ${
+        process.env.GROQ_API_KEY
+          ? "CONFIGURED"
+          : "NOT CONFIGURED"
+      }`
+    );
+
     console.log(
       "========================================"
     );
+
     console.log("");
   }
 );

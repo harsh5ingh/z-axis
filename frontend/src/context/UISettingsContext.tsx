@@ -194,18 +194,43 @@ export function UISettingsProvider({ children }: { children: React.ReactNode }) 
   }, [language]);
 
   useEffect(() => {
-    try { window.localStorage.setItem("geovista.ui.theme", theme); } catch { /* preference remains active for this page */ }
-    const root = document.documentElement;
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const applyTheme = () => {
-      root.dataset.theme = theme;
-      root.dataset.colorScheme = theme === "system" ? (media.matches ? "dark" : "light") : theme;
-      root.style.colorScheme = root.dataset.colorScheme;
-    };
-    applyTheme();
-    media.addEventListener("change", applyTheme);
-    return () => media.removeEventListener("change", applyTheme);
-  }, [theme]);
+  try {
+    window.localStorage.setItem("geovista.ui.theme", theme);
+  } catch {
+    // preference remains active for this page
+  }
+
+  const root = document.documentElement;
+  const media = window.matchMedia("(prefers-color-scheme: dark)");
+
+  const applyTheme = () => {
+    const resolvedTheme =
+      theme === "system"
+        ? media.matches
+          ? "dark"
+          : "light"
+        : theme;
+
+    // Tailwind dark: classes depend on .dark
+    root.classList.toggle("dark", resolvedTheme === "dark");
+
+    // Keep attributes available if other parts of the app use them
+    root.dataset.theme = theme;
+    root.dataset.colorScheme = resolvedTheme;
+
+    // Native browser controls
+    root.style.colorScheme = resolvedTheme;
+  };
+
+  applyTheme();
+
+  media.addEventListener("change", applyTheme);
+
+  return () => {
+    media.removeEventListener("change", applyTheme);
+  };
+}, [theme]);
+
 
   useEffect(() => {
     try { window.localStorage.setItem("geovista.ui.city", city); } catch { /* preference remains active for this page */ }

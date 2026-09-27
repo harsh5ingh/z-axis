@@ -347,7 +347,7 @@ export const PublicPortal: React.FC = () => {
               <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3">
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50"><StreetMapIcon className="h-5 w-5 text-emerald-700" /></div>
-                  <div><h2 className="text-sm font-bold text-[#071d35]">{selectedCity === "bhopal" ? "Bhopal street and neighborhood context" : "New York City street and borough context"}</h2><p className="text-xs text-slate-500">OpenStreetMap street basemap · separate from cadastral records</p></div>
+                  <div><h2 className="text-sm font-bold text-[#071d35]">{selectedCity === "bhopal" ? "Street and Neighborhood context" : "New York City street and borough context"}</h2><p className="text-xs text-slate-500">OpenStreetMap street basemap · separate from cadastral records</p></div>
                 </div>
                 <span className="hidden rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-bold text-slate-600 sm:block">2D CITY CONTEXT</span>
               </div>

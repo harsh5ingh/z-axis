@@ -8,6 +8,8 @@
 .env.*
 !.env.example
 *.local
+# Large CSV datasets
+*.csv
 
 # ================================
 

@@ -2,43 +2,105 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* =========================================================
+   BASE
+   ========================================================= */
+
+html {
+  background: #ffffff;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+body {
+  margin: 0;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "Roboto",
+    "Oxygen",
+    "Ubuntu",
+    "Cantarell",
+    "Fira Sans",
+    "Droid Sans",
+    "Helvetica Neue",
+    sans-serif;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  background: #ffffff;
+  color: #0f172a;
+
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
 }
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+/* =========================================================
+   SCROLLBAR — LIGHT MODE
+   ========================================================= */
+
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
 ::-webkit-scrollbar-track {
   background: #f1f5f9;
 }
+
 ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
-  border-radius: 3px;
+  border-radius: 999px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
 
-/* The navbar's existing appearance menu applies this scheme to every portal. */
+/* =========================================================
+   DARK MODE — GLOBAL
+   ========================================================= */
+
+[data-color-scheme="dark"] {
+  color-scheme: dark;
+  background: #0b1220;
+}
+
 [data-color-scheme="dark"] body {
+  background: #0b1220;
+  color: #e2e8f0;
+}
+
+[data-color-scheme="dark"] #root {
   background: #0b1220;
   color: #e2e8f0;
 }
 
 [data-color-scheme="dark"] #root .min-h-screen {
   background-color: #0b1220 !important;
+  color: #e2e8f0 !important;
 }
+
+/* =========================================================
+   DARK MODE — MAIN BACKGROUNDS
+   ========================================================= */
 
 [data-color-scheme="dark"] #root .bg-white,
 [data-color-scheme="dark"] #root .bg-white\/95,
+[data-color-scheme="dark"] #root .bg-white\/90,
+[data-color-scheme="dark"] #root .bg-white\/80,
+[data-color-scheme="dark"] #root [class~="bg-white/95"],
 [data-color-scheme="dark"] #root [class~="bg-white/90"],
 [data-color-scheme="dark"] #root [class~="bg-white/80"] {
   background-color: #111c2c !important;
@@ -53,10 +115,22 @@ body {
   background-color: #0b1220 !important;
 }
 
-/* The portal cards use light gradient utilities, which otherwise retain their
-   pale gradient even when the color scheme switches to dark. */
+[data-color-scheme="dark"] #root .bg-gray-50 {
+  background-color: #111c2c !important;
+}
+
+[data-color-scheme="dark"] #root .bg-gray-100 {
+  background-color: #172337 !important;
+}
+
+/* =========================================================
+   DARK MODE — GRADIENTS
+   ========================================================= */
+
 [data-color-scheme="dark"] #root [class~="from-emerald-50"],
-[data-color-scheme="dark"] #root [class~="from-blue-50"] {
+[data-color-scheme="dark"] #root [class~="from-blue-50"],
+[data-color-scheme="dark"] #root [class~="from-sky-50"],
+[data-color-scheme="dark"] #root [class~="from-violet-50"] {
   background-image: none !important;
   background-color: #111c2c !important;
 }
@@ -65,30 +139,164 @@ body {
   --tw-gradient-to: #111c2c var(--tw-gradient-to-position) !important;
 }
 
-[data-color-scheme="dark"] #root [class~="bg-slate-100"] {
-  background-color: #1b2a3d !important;
+[data-color-scheme="dark"] #root [class~="via-white"] {
+  --tw-gradient-via: #111c2c var(--tw-gradient-via-position) !important;
 }
 
-[data-color-scheme="dark"] #root [class~="text-[#071d35]"],
-[data-color-scheme="dark"] #root [class~="text-[#10284b]"],
+/* =========================================================
+   DARK MODE — TEXT
+   ========================================================= */
+
+/* Main dark text → readable light text */
+
 [data-color-scheme="dark"] #root .text-slate-900,
 [data-color-scheme="dark"] #root .text-slate-800,
-[data-color-scheme="dark"] #root .text-slate-700 {
+[data-color-scheme="dark"] #root .text-slate-700,
+[data-color-scheme="dark"] #root .text-gray-900,
+[data-color-scheme="dark"] #root .text-gray-800,
+[data-color-scheme="dark"] #root .text-gray-700,
+[data-color-scheme="dark"] #root [class~="text-[#071d35]"],
+[data-color-scheme="dark"] #root [class~="text-[#10284b]"] {
   color: #e2e8f0 !important;
 }
 
+/* Secondary text */
+
 [data-color-scheme="dark"] #root .text-slate-600,
-[data-color-scheme="dark"] #root .text-slate-500 {
+[data-color-scheme="dark"] #root .text-slate-500,
+[data-color-scheme="dark"] #root .text-slate-400,
+[data-color-scheme="dark"] #root .text-gray-600,
+[data-color-scheme="dark"] #root .text-gray-500,
+[data-color-scheme="dark"] #root .text-gray-400 {
   color: #a7b4c7 !important;
 }
 
+/* Muted text should still remain visible */
+
+[data-color-scheme="dark"] #root .text-slate-300,
+[data-color-scheme="dark"] #root .text-gray-300 {
+  color: #c3cfdd !important;
+}
+
+/* =========================================================
+   DARK MODE — COLORED TEXT
+   ========================================================= */
+
+[data-color-scheme="dark"] #root .text-blue-900,
+[data-color-scheme="dark"] #root .text-blue-800,
+[data-color-scheme="dark"] #root .text-blue-700 {
+  color: #93c5fd !important;
+}
+
+[data-color-scheme="dark"] #root .text-blue-600,
+[data-color-scheme="dark"] #root .text-blue-500 {
+  color: #60a5fa !important;
+}
+
+[data-color-scheme="dark"] #root .text-emerald-900,
+[data-color-scheme="dark"] #root .text-emerald-800,
+[data-color-scheme="dark"] #root .text-emerald-700 {
+  color: #6ee7b7 !important;
+}
+
+[data-color-scheme="dark"] #root .text-emerald-600,
+[data-color-scheme="dark"] #root .text-emerald-500 {
+  color: #34d399 !important;
+}
+
+[data-color-scheme="dark"] #root .text-sky-900,
+[data-color-scheme="dark"] #root .text-sky-800,
+[data-color-scheme="dark"] #root .text-sky-700 {
+  color: #7dd3fc !important;
+}
+
+[data-color-scheme="dark"] #root .text-violet-900,
+[data-color-scheme="dark"] #root .text-violet-800,
+[data-color-scheme="dark"] #root .text-violet-700 {
+  color: #c4b5fd !important;
+}
+
+[data-color-scheme="dark"] #root .text-amber-900,
+[data-color-scheme="dark"] #root .text-amber-800,
+[data-color-scheme="dark"] #root .text-amber-700 {
+  color: #fcd34d !important;
+}
+
+[data-color-scheme="dark"] #root .text-rose-900,
+[data-color-scheme="dark"] #root .text-rose-800,
+[data-color-scheme="dark"] #root .text-rose-700 {
+  color: #fda4af !important;
+}
+
+[data-color-scheme="dark"] #root .text-red-900,
+[data-color-scheme="dark"] #root .text-red-800,
+[data-color-scheme="dark"] #root .text-red-700 {
+  color: #fca5a5 !important;
+}
+
+/* =========================================================
+   DARK MODE — LIGHT COLORED BACKGROUNDS
+   ========================================================= */
+
+[data-color-scheme="dark"] #root .bg-blue-50,
+[data-color-scheme="dark"] #root .bg-blue-100 {
+  background-color: #14243a !important;
+}
+
+[data-color-scheme="dark"] #root .bg-emerald-50,
+[data-color-scheme="dark"] #root .bg-emerald-100 {
+  background-color: #102c2a !important;
+}
+
+[data-color-scheme="dark"] #root .bg-sky-50,
+[data-color-scheme="dark"] #root .bg-sky-100 {
+  background-color: #122b3b !important;
+}
+
+[data-color-scheme="dark"] #root .bg-violet-50,
+[data-color-scheme="dark"] #root .bg-violet-100 {
+  background-color: #211b38 !important;
+}
+
+[data-color-scheme="dark"] #root .bg-amber-50,
+[data-color-scheme="dark"] #root .bg-amber-100 {
+  background-color: #332916 !important;
+}
+
+[data-color-scheme="dark"] #root .bg-rose-50,
+[data-color-scheme="dark"] #root .bg-rose-100 {
+  background-color: #321d25 !important;
+}
+
+[data-color-scheme="dark"] #root .bg-red-50,
+[data-color-scheme="dark"] #root .bg-red-100 {
+  background-color: #321d1d !important;
+}
+
+/* =========================================================
+   DARK MODE — BORDERS
+   ========================================================= */
+
+[data-color-scheme="dark"] #root .border-slate-50,
 [data-color-scheme="dark"] #root .border-slate-100,
 [data-color-scheme="dark"] #root .border-slate-200,
-[data-color-scheme="dark"] #root .border-slate-300 {
+[data-color-scheme="dark"] #root .border-slate-300,
+[data-color-scheme="dark"] #root .border-gray-100,
+[data-color-scheme="dark"] #root .border-gray-200,
+[data-color-scheme="dark"] #root .border-gray-300 {
   border-color: #2b3b51 !important;
 }
 
-[data-color-scheme="dark"] #root input:not([type="checkbox"]),
+[data-color-scheme="dark"] #root .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+[data-color-scheme="dark"] #root .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #2b3b51 !important;
+}
+
+/* =========================================================
+   DARK MODE — INPUTS / SELECTS / TEXTAREAS
+   ========================================================= */
+
+[data-color-scheme="dark"] #root input:not([type="checkbox"]):not([type="radio"]),
 [data-color-scheme="dark"] #root textarea,
 [data-color-scheme="dark"] #root select {
   background-color: #0d1726 !important;
@@ -96,40 +304,208 @@ body {
   color: #e2e8f0 !important;
 }
 
-[data-color-scheme="dark"] #root .bg-blue-50,
-[data-color-scheme="dark"] #root .bg-emerald-50,
-[data-color-scheme="dark"] #root .bg-sky-50,
-[data-color-scheme="dark"] #root .bg-violet-50 {
-  background-color: #17283a !important;
+[data-color-scheme="dark"] #root input::placeholder,
+[data-color-scheme="dark"] #root textarea::placeholder {
+  color: #718198 !important;
+  opacity: 1;
 }
 
-[data-color-scheme="dark"] #root .bg-amber-50,
-[data-color-scheme="dark"] #root .bg-rose-50,
-[data-color-scheme="dark"] #root .bg-red-50 {
-  background-color: #2a2022 !important;
+[data-color-scheme="dark"] #root input:focus,
+[data-color-scheme="dark"] #root textarea:focus,
+[data-color-scheme="dark"] #root select:focus {
+  border-color: #3b82f6 !important;
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(59 130 246 / 0.15) !important;
 }
 
-[data-color-scheme="dark"] #root .text-blue-900,
-[data-color-scheme="dark"] #root .text-blue-800,
-[data-color-scheme="dark"] #root .text-blue-700,
-[data-color-scheme="dark"] #root .text-emerald-900,
-[data-color-scheme="dark"] #root .text-emerald-800,
-[data-color-scheme="dark"] #root .text-emerald-700,
-[data-color-scheme="dark"] #root .text-amber-900,
-[data-color-scheme="dark"] #root .text-amber-800,
-[data-color-scheme="dark"] #root .text-rose-800 {
-  color: #dbeafe !important;
+/* =========================================================
+   DARK MODE — CHECKBOX / RADIO
+   ========================================================= */
+
+[data-color-scheme="dark"] #root input[type="checkbox"],
+[data-color-scheme="dark"] #root input[type="radio"] {
+  accent-color: #3b82f6;
 }
+
+/* =========================================================
+   DARK MODE — BUTTONS
+   ========================================================= */
+
+[data-color-scheme="dark"] #root button {
+  color: inherit;
+}
+
+[data-color-scheme="dark"] #root button:hover {
+  filter: brightness(1.08);
+}
+
+[data-color-scheme="dark"] #root button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  filter: none;
+}
+
+/* =========================================================
+   DARK MODE — LINKS
+   ========================================================= */
+
+[data-color-scheme="dark"] #root a {
+  color: inherit;
+}
+
+[data-color-scheme="dark"] #root a.text-blue-600,
+[data-color-scheme="dark"] #root a.text-blue-700 {
+  color: #60a5fa !important;
+}
+
+[data-color-scheme="dark"] #root a:hover {
+  color: #93c5fd !important;
+}
+
+/* =========================================================
+   DARK MODE — TABLES
+   ========================================================= */
+
+[data-color-scheme="dark"] #root table {
+  color: #e2e8f0;
+}
+
+[data-color-scheme="dark"] #root thead {
+  background-color: #172337 !important;
+}
+
+[data-color-scheme="dark"] #root th {
+  color: #cbd5e1 !important;
+  border-color: #2b3b51 !important;
+}
+
+[data-color-scheme="dark"] #root td {
+  border-color: #2b3b51 !important;
+}
+
+/* =========================================================
+   DARK MODE — HR / DIVIDERS
+   ========================================================= */
+
+[data-color-scheme="dark"] #root hr {
+  border-color: #2b3b51 !important;
+}
+
+/* =========================================================
+   DARK MODE — COMMON SHADOWS
+   ========================================================= */
 
 [data-color-scheme="dark"] #root .shadow-sm,
+[data-color-scheme="dark"] #root .shadow,
+[data-color-scheme="dark"] #root .shadow-md,
+[data-color-scheme="dark"] #root .shadow-lg,
 [data-color-scheme="dark"] #root .shadow-xl,
 [data-color-scheme="dark"] #root .shadow-2xl {
-  --tw-shadow-color: rgb(0 0 0 / 0.25);
+  --tw-shadow-color: rgb(0 0 0 / 0.35);
 }
+
+/* =========================================================
+   DARK MODE — SELECTION
+   ========================================================= */
+
+[data-color-scheme="dark"] #root ::selection {
+  background: rgb(59 130 246 / 0.35);
+  color: #ffffff;
+}
+
+/* =========================================================
+   DARK MODE — SCROLLBAR
+   ========================================================= */
+
+[data-color-scheme="dark"] ::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+[data-color-scheme="dark"] ::-webkit-scrollbar-track {
+  background: #0b1220;
+}
+
+[data-color-scheme="dark"] ::-webkit-scrollbar-thumb {
+  background: #34465e;
+  border-radius: 999px;
+}
+
+[data-color-scheme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: #4b607b;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
 
 @media (max-width: 640px) {
   [data-color-scheme="dark"] #root [class~="from-emerald-50"],
-  [data-color-scheme="dark"] #root [class~="from-blue-50"] {
+  [data-color-scheme="dark"] #root [class~="from-blue-50"],
+  [data-color-scheme="dark"] #root [class~="from-sky-50"],
+  [data-color-scheme="dark"] #root [class~="from-violet-50"] {
     border-color: #2b3b51 !important;
   }
 }
+
+/* =========================================================
+   TECHNICAL CONFIDENCE — LIGHT MODE
+   Keep dark mode untouched
+   ========================================================= */
+
+[data-color-scheme="light"] #root .confidence-meter-card {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.08) !important;
+}
+
+[data-color-scheme="light"] #root .confidence-meter-card .bg-slate-50 {
+  background-color: #f8fafc !important;
+}
+
+[data-color-scheme="light"] #root .confidence-meter-card .bg-slate-100 {
+  background-color: #f1f5f9 !important;
+}
+
+[data-color-scheme="light"] #root .confidence-meter-card .border-slate-100,
+[data-color-scheme="light"] #root .confidence-meter-card .border-slate-200 {
+  border-color: #e2e8f0 !important;
+}
+
+[data-color-scheme="light"] #root .confidence-meter-card .text-slate-900,
+[data-color-scheme="light"] #root .confidence-meter-card .text-slate-800,
+[data-color-scheme="light"] #root .confidence-meter-card .text-slate-700 {
+  color: #0f172a !important;
+}
+
+[data-color-scheme="light"] #root .confidence-meter-card .text-slate-600 {
+  color: #475569 !important;
+}
+
+[data-color-scheme="light"] #root .confidence-meter-card .text-slate-500 {
+  color: #64748b !important;
+}
+
+[data-color-scheme="light"] #root .confidence-meter-card .text-slate-400 {
+  color: #94a3b8 !important;
+}
+
+/* Notice box */
+[data-color-scheme="light"] #root .confidence-meter-card .bg-blue-50\/70 {
+  background-color: #eff6ff !important;
+}
+
+[data-color-scheme="light"] #root .confidence-meter-card .border-blue-100 {
+  border-color: #dbeafe !important;
+}
+
+[data-color-scheme="light"] #root .confidence-meter-card .text-blue-600 {
+  color: #2563eb !important;
+}
+
+/* Score bar background */
+[data-color-scheme="light"] #root .confidence-meter-card .bg-slate-100 {
+  background-color: #f1f5f9 !important;
+}
+

@@ -71,44 +71,92 @@ const AppContent: React.FC = () => {
   const profileDemoVerified = useMemo(() => Boolean(readDemoProfile(currentUser)), [currentUser, profileRevision]);
 
   /* ------------------------------------------------------------------------
-     RESTORE SESSION
-  ------------------------------------------------------------------------ */
+   RESTORE SESSION
+------------------------------------------------------------------------ */
 
-  useEffect(() => {
-    const restoreSession =
-      async () => {
-        if (
-          !api.isAuthenticated()
-        ) {
-          return;
-        }
+useEffect(() => {
+  let mounted = true;
 
-        try {
-          const response =
-            await api.me();
+  const restoreSession = async () => {
+    /*
+     * STEP 1:
+     * Restore the locally stored user immediately.
+     *
+     * This prevents a refresh from temporarily resetting the
+     * application to the Home page.
+     */
+    const storedUser = api.getCurrentUser();
 
-          setCurrentUser(
-            response.user,
-          );
+    if (storedUser && api.isAuthenticated()) {
+      if (!mounted) return;
 
-          if (
-            response.user.role ===
-            "officer"
-          ) {
-            setView("officer");
-          } else {
-            setView("public");
-          }
-        } catch {
-          api.logout();
+      setCurrentUser(storedUser);
 
-          setCurrentUser(null);
-          setView("home");
-        }
-      };
+      if (storedUser.role === "officer") {
+        setView("officer");
+      } else {
+        setView("public");
+      }
+    }
 
-    void restoreSession();
-  }, []);
+    /*
+     * No token -> nothing to restore.
+     */
+    if (!api.isAuthenticated()) {
+      return;
+    }
+
+    /*
+     * STEP 2:
+     * Validate the JWT with the backend.
+     */
+    try {
+      const response = await api.me();
+
+      if (!mounted) return;
+
+      setCurrentUser(response.user);
+
+      if (response.user.role === "officer") {
+        setView("officer");
+      } else {
+        setView("public");
+      }
+    } catch (error) {
+      /*
+       * IMPORTANT:
+       *
+       * Do NOT automatically logout on every error.
+       *
+       * A temporary backend/network failure should not destroy
+       * an otherwise valid 8-hour client session.
+       */
+      console.warn(
+        "Session validation failed:",
+        error,
+      );
+
+      /*
+       * Only clear the UI if the token is actually gone.
+       *
+       * api.request() already removes the token when the backend
+       * explicitly returns 401.
+       */
+      if (!api.isAuthenticated()) {
+        if (!mounted) return;
+
+        setCurrentUser(null);
+        setView("home");
+      }
+    }
+  };
+
+  void restoreSession();
+
+  return () => {
+    mounted = false;
+  };
+}, []);
 
   /* ------------------------------------------------------------------------
      AUTH

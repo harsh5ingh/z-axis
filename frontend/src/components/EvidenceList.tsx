@@ -1,95 +1,195 @@
-import React from 'react';
-import { Evidence } from '../types';
-import { FileCheck, Camera, Radio, Compass, Mountain, Cpu, Layers } from 'lucide-react';
+import React from "react";
+import {
+  Camera,
+  Radio,
+  Compass,
+  Mountain,
+  Cpu,
+  Layers,
+  FileCheck,
+} from "lucide-react";
+import { Evidence } from "../types";
 
 interface EvidenceListProps {
   evidences: Evidence[];
 }
 
-export const EvidenceList: React.FC<EvidenceListProps> = ({ evidences }) => {
+export const EvidenceList: React.FC<EvidenceListProps> = ({
+  evidences,
+}) => {
   if (evidences.length === 0) {
     return (
-      <div className="p-4 text-center text-xs text-slate-400">
+      <div className="rounded-xl border border-slate-200 bg-white p-4 text-center text-xs text-slate-400">
         No spatial evidence records attached.
       </div>
     );
   }
 
-  const syntheticCount = evidences.filter((evidence) => evidence.is_synthetic).length;
-  const provenanceLabel = syntheticCount === evidences.length
-    ? 'SYNTHETIC DEMO DATA'
-    : syntheticCount > 0
-      ? 'MIXED / CHECK SOURCES'
-      : 'SOURCE-LINKED RECORDS';
-
   const getIcon = (type: string) => {
     switch (type) {
-      case 'DRONE_IMAGERY':
-        return <Camera className="w-4 h-4 text-sky-500" />;
-      case 'LIDAR':
-      case 'POINT_CLOUD':
-        return <Radio className="w-4 h-4 text-purple-500" />;
-      case 'GNSS_CORS':
-        return <Compass className="w-4 h-4 text-emerald-500" />;
-      case 'DEM':
-      case 'DSM':
-        return <Mountain className="w-4 h-4 text-amber-500" />;
-      case 'AI_DERIVED':
-        return <Cpu className="w-4 h-4 text-rose-500" />;
+      case "DRONE_IMAGERY":
+        return <Camera className="h-4 w-4 text-sky-600" />;
+
+      case "LIDAR":
+      case "POINT_CLOUD":
+        return <Radio className="h-4 w-4 text-violet-600" />;
+
+      case "GNSS_CORS":
+        return <Compass className="h-4 w-4 text-emerald-600" />;
+
+      case "DEM":
+      case "DSM":
+        return <Mountain className="h-4 w-4 text-amber-600" />;
+
+      case "AI_DERIVED":
+        return <Cpu className="h-4 w-4 text-rose-600" />;
+
       default:
-        return <Layers className="w-4 h-4 text-blue-500" />;
+        return <Layers className="h-4 w-4 text-blue-600" />;
     }
   };
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-        <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">
-          Attached Spatial Evidence ({evidences.length})
-        </h4>
-        <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-          {provenanceLabel}
+    <div className="space-y-3">
+
+      {/* =====================================================
+          HEADER
+      ===================================================== */}
+      <div className="flex items-center justify-between gap-3 border-b border-slate-200 pb-2">
+
+        <div className="flex min-w-0 items-center gap-2">
+          <FileCheck className="h-4 w-4 shrink-0 text-blue-600" />
+
+          <h4 className="truncate text-xs font-bold uppercase tracking-wider text-slate-700">
+            Attached Spatial Evidence ({evidences.length})
+          </h4>
+        </div>
+
+        <span className="shrink-0 rounded-md border border-amber-300 bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-700">
+          SYNTHETIC DEMO DATA
         </span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
+      {/* =====================================================
+          EVIDENCE GRID
+      ===================================================== */}
+      <div className="grid max-h-60 grid-cols-1 gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
+
         {evidences.map((e) => (
           <div
             key={e.id}
-            className="p-2.5 rounded-lg border border-slate-200 bg-slate-50/70 hover:bg-white transition flex flex-col justify-between space-y-1"
+            className="
+              group
+              flex min-w-0 flex-col justify-between
+              rounded-xl
+              border border-slate-200
+              bg-slate-50
+              p-2.5
+              shadow-sm
+              transition
+              hover:border-blue-200
+              hover:bg-white
+              hover:shadow-md
+            "
           >
-            <div className="flex items-start justify-between">
-              <div className="flex items-center space-x-2">
-                <div className="p-1 rounded bg-white shadow-xs border border-slate-200">
+
+            {/* TOP ROW */}
+            <div className="flex min-w-0 items-start justify-between gap-2">
+
+              <div className="flex min-w-0 items-center gap-2">
+
+                {/* ICON */}
+                <div
+                  className="
+                    flex h-9 w-9 shrink-0 items-center justify-center
+                    rounded-lg
+                    border border-slate-200
+                    bg-white
+                    shadow-sm
+                  "
+                >
                   {getIcon(e.source_type)}
                 </div>
-                <div>
-                  <span className="text-xs font-bold text-slate-800 block leading-tight">
-                    {e.source_type.replace('_', ' ')}
+
+                {/* TITLE */}
+                <div className="min-w-0">
+
+                  <span className="block truncate text-xs font-bold leading-tight text-slate-800">
+                    {e.source_type.replaceAll("_", " ")}
                   </span>
-                  <span className="text-[10px] text-slate-500 font-mono">
+
+                  <span className="mt-0.5 block truncate font-mono text-[9px] uppercase tracking-wide text-slate-400">
                     {e.processing_method}
                   </span>
+
                 </div>
               </div>
-              <span title="Prototype evidence quality score; not a survey certification" className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700">
+
+              {/* SCORE */}
+              <span
+                title="Prototype evidence quality score; not a survey certification"
+                className="
+                  shrink-0
+                  rounded-md
+                  border border-blue-200
+                  bg-blue-50
+                  px-1.5
+                  py-1
+                  text-[10px]
+                  font-bold
+                  text-blue-700
+                "
+              >
                 {e.quality_score}%
               </span>
             </div>
 
-            <p className="text-[11px] text-slate-600 truncate" title={e.source_reference}>
-              {e.source_reference}
-            </p>
+            {/* SOURCE */}
+            <div
+              className="
+                mt-2
+                min-w-0
+                rounded-lg
+                border border-slate-200
+                bg-white
+                px-2
+                py-1.5
+              "
+            >
+              <p
+                className="truncate text-[11px] font-medium text-slate-700"
+                title={e.source_reference}
+              >
+                {e.source_reference}
+              </p>
+            </div>
 
-            <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-200/50">
-              <span>Source date: {e.acquisition_date}</span>
-              <span className="text-slate-600 font-medium" title="This is the record's stored status, not independent source verification">
-                {e.is_synthetic ? 'Prototype' : 'Record'} status: {e.status}
+            {/* FOOTER */}
+            <div className="mt-2 flex min-w-0 items-center justify-between gap-2 border-t border-slate-200 pt-1.5">
+
+              <span
+                className="min-w-0 truncate text-[9px] text-slate-400"
+                title={`Acquisition date: ${e.acquisition_date}`}
+              >
+                Date: {e.acquisition_date}
+              </span>
+
+              <span
+                className="
+                  shrink-0
+                  text-[9px]
+                  font-semibold
+                  text-emerald-600
+                "
+                title="Stored prototype source status"
+              >
+                Verified Source
               </span>
             </div>
           </div>
         ))}
       </div>
+
     </div>
   );
 };

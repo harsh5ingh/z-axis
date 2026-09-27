@@ -36,7 +36,9 @@ const VIEW_TOOLS: Array<[LucideIcon, string]> = [
   [Search, "Zoom"], [Box, "X-Ray"], [Layers3, "Floor View"],
 ];
 
-const DEFAULT_URL = "/data/processed/buildings/bhopal_buildings_3d.geojson";
+const DEFAULT_URL =
+  import.meta.env.VITE_BUILDINGS_GEOJSON_URL ||
+  "/data/processed/buildings/bhopal_buildings_3d.geojson";
 const CENTER = { lat: 23.2596, lon: 77.4126 };
 const M_LAT = 111320;
 const M_LON = 111320 * Math.cos(THREE.MathUtils.degToRad(CENTER.lat));

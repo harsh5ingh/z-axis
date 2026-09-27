@@ -70,7 +70,9 @@ type Layers = {
 };
 type Check = { name: string; status: "VALID" | "WARNING" | "ERROR"; note: string };
 
-const BHOPAL_DATA_URL = "/data/processed/buildings/bhopal_buildings_3d.geojson";
+const BHOPAL_DATA_URL =
+  import.meta.env.VITE_BUILDINGS_GEOJSON_URL ||
+  "/data/processed/buildings/bhopal_buildings_3d.geojson";
 const NYC_BUILDINGS_URL = "https://data.cityofnewyork.us/resource/5zhs-2jue.geojson";
 const NYC_PARCELS_URL =
   "https://services5.arcgis.com/GfwWNkhOj9bNBqoJ/arcgis/rest/services/MAPPLUTO/FeatureServer/0/query";

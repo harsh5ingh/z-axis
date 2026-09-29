@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    {
+      "source": "/sih-demo",
+      "destination": "https://youtu.be/sETp73YxHw0",
+      "permanent": false
+    }
+  ]
+}
